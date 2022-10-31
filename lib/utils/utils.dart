@@ -7,7 +7,7 @@ void mostrarAlerta(BuildContext context, String mensaje) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Algo salio mal'),
+          title: const Text('Algo salió mal'),
           content: Text(mensaje),
           actions: [
             BtnPpal(

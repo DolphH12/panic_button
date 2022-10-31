@@ -42,7 +42,7 @@ class _SplashPageState extends State<SplashPage> {
 
   Widget _tituloApp() {
     return Text(
-      'Botón de Panico',
+      'Botón de pánico',
       style: TextStyle(
           color: Theme.of(context).primaryColor,
           fontSize: 30,

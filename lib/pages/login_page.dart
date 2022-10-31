@@ -61,8 +61,8 @@ class _LoginPageState extends State<LoginPage> {
           //the return value will be from "Yes" or "No" options
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Boton de Panico'),
-            content: const Text('Quieres salir de la app?'),
+            title: const Text('Botón de pánico'),
+            content: const Text('¿Quieres salir de la app?'),
             actions: [
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Boton de panico',
+          'Botón de pánico',
           style: TextStyle(
               color: Theme.of(context).primaryColor,
               fontSize: 25,
@@ -145,7 +145,7 @@ class __FormState extends State<_Form> {
             height: 20,
           ),
           BtnPpal(
-            textobutton: 'Iniciar Sesión',
+            textobutton: 'Iniciar sesión',
             onPressed: () {
               final progress = ProgressHUD.of(context);
               _onSubmit(context);

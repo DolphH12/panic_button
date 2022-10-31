@@ -134,7 +134,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text(
-        "Boton Externo",
+        "Botón externo",
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
       subtitle: Row(
@@ -229,7 +229,7 @@ class ButtonPanicWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Boton de Panico",
+                "Botón de pánico",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
@@ -250,11 +250,13 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-                  "Recuerda presionar el boton de abajo en caso de emergencia.",
+                  "Recuerda presionar el botón de abajo en caso de emergencia.",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
                       fontSize: 15,
-                      fontWeight: FontWeight.bold),
+                      fontWeight: FontWeight.bold
+                      ),
                 ),
               ),
               const SizedBox(

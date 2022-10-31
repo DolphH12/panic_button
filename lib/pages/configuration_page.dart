@@ -52,7 +52,7 @@ class ContainPresentation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Configura tu app",
+          "Configura tu App",
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Theme.of(context).primaryColor,
@@ -118,11 +118,11 @@ class _StepPresentationState extends State<StepPresentation> {
               isActive: currentStep > 0,
               state: currentStep > 0 ? StepState.complete : StepState.disabled),
           Step(
-              title: const Text("Seleccionar Color"),
+              title: const Text("Seleccionar color"),
               content: Column(
                 children: [
                   BtnCasual(
-                      textobutton: 'Selecciona Color',
+                      textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -187,7 +187,7 @@ class _StepPresentationState extends State<StepPresentation> {
         if (!mounted) {}
         state == 'ok'
             ? setState(() => currentStep += 1)
-            : mostrarAlerta(context, "Fallo algo en la actualizacion.");
+            : mostrarAlerta(context, "Falló algo en la actualización.");
       } else if (nameCtrl.text.isNotEmpty && lastNameCtrl.text.isEmpty ||
           nameCtrl.text.isEmpty && lastNameCtrl.text.isNotEmpty) {
         mensajeInfo(context, "Algo anda mal",

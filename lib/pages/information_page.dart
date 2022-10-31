@@ -350,14 +350,25 @@ class _StepPresentationState extends State<StepPresentation> {
         print(commentCtrl.text);
         print(widget.type);
         print(position.latitude);
+        
         await eventService.addEvent(position, widget.type, commentCtrl.text);
         setState(() => currentStep += 1);
       } else {
         mensajeInfo(
-            context, "Algo salio Mal", "Recuerda añadir una descripción");
+            context, "Algo salió mal", "Recuerda añadir una descripción");
       }
     } else if (currentStep == 1) {
-      Navigator.pushNamed(context, 'home');
+      final attachFilesConfirmed  = await eventService.attachFiles(image?.path, recordFilePath);
+      
+      if(attachFilesConfirmed) {
+        Future.delayed(const Duration(seconds: 3), () {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Evidencias enviadas correctamente."), duration: Duration(seconds: 5),));
+          Navigator.pushNamed(context, 'home');
+        });
+      } else {
+        if(!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No fue posible anexar las evidencias. Inténtalo de nuevo.")));
+      }
     }
   }
 
