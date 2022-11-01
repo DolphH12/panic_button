@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:panic_app/services/user_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -12,11 +14,25 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
-    Timer(const Duration(seconds: 3),
-        () => Navigator.pushNamed(context, 'login'));
     super.initState();
+    final prefs = PreferenciasUsuario();
+    if(prefs.token.isNotEmpty) {
+      access(prefs.access);
+      Timer(const Duration(seconds: 5),
+        () => Navigator.pushNamed(context, 'home'));
+    } else {
+       Timer(const Duration(seconds: 3),
+        () => Navigator.pushNamed(context, 'login'));
+    }
+
+    
   }
 
+  Future<void> access(List<String> value) async {
+    await UsuarioService().login(value[0], value[1]);
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

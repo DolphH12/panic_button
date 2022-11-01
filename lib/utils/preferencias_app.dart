@@ -76,4 +76,14 @@ class PreferenciasUsuario {
   set colorButton(Color color) {
     _prefs.setInt('colorButton', color.value);
   }
+
+   List<String> get access {
+    return _prefs.getStringList("access") ?? [];
+  }
+
+   set access(List<String> value) {
+    _prefs.setStringList("access", value);
+  }
+
+
 }

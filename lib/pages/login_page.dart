@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
-
 import '../utils/utils.dart';
 import '../widgets/btn_ppal.dart';
 import '../widgets/custom_input.dart';
@@ -168,13 +167,14 @@ class __FormState extends State<_Form> {
     info = await usuarioService.login(userCtrl.text, passCtrl.text);
 
     if (info['ok']) {
+      prefs.access = [userCtrl.text, passCtrl.text];
       final seen = prefs.firstTime;
       Future.delayed(const Duration(seconds: 5), () {
         // Navigator.pushReplacementNamed(context, 'intro');
         if (seen) {
           Navigator.pushReplacementNamed(context, 'home');
         } else {
-          prefs.firstTime = true;
+          
           Navigator.pushReplacementNamed(context, 'intro');
         }
       });

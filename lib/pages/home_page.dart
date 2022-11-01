@@ -110,7 +110,10 @@ class MenuDrawer extends StatelessWidget {
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             trailing: const Icon(Icons.exit_to_app_rounded),
-            onTap: () => Navigator.pushReplacementNamed(context, 'login'),
+            onTap: () {
+              prefs.token = "";
+              Navigator.pushReplacementNamed(context, 'login');
+            },
           )
         ],
       ),

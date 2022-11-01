@@ -361,13 +361,16 @@ class _StepPresentationState extends State<StepPresentation> {
       final attachFilesConfirmed  = await eventService.attachFiles(image?.path, recordFilePath);
       
       if(attachFilesConfirmed) {
-        Future.delayed(const Duration(seconds: 3), () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Evidencias enviadas correctamente."), duration: Duration(seconds: 5),));
-          Navigator.pushNamed(context, 'home');
-        });
+        if(!mounted) return;
+        mensajeInfo(context, "Envío exitoso", "Evidencias enviadas correctamente.");
+        Navigator.pushNamed(context, 'home');
+        // Future.delayed(const Duration(seconds: 3), () {
+        //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Evidencias enviadas correctamente."), duration: Duration(seconds: 5),));
+        //   Navigator.pushNamed(context, 'home');
+        // });
       } else {
         if(!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No fue posible anexar las evidencias. Inténtalo de nuevo.")));
+          mensajeInfo(context, "Envío fallido", "No fue posible enviar las evidencias");
       }
     }
   }

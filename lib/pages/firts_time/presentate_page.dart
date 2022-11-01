@@ -168,6 +168,7 @@ class _StepPresentationState extends State<StepPresentation> {
       // setState(() => currentStep += 1);
     } else if (currentStep == 1) {
       prefs.colorButton = pickerColor;
+      prefs.firstTime = true;
       Future.delayed(const Duration(seconds: 2),
           (() => Navigator.pushReplacementNamed(context, 'home')));
       mensajeInfo(context, "¡Felicidades!", "Personalización completa");

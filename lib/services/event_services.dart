@@ -36,8 +36,8 @@ class EventService {
 
   Future<bool> attachFiles(String? image, String? audio) async {
     final username = _prefs.username;
-    print("IMAGEN $image");
-    print("AUDIO $audio");
+    // print("IMAGEN $image");
+    // print("AUDIO $audio");
 
     var headers = {
       'Authorization': 'Bearer ${_prefs.token}',
@@ -49,7 +49,7 @@ class EventService {
       if((image == null) && !(audio == null)) {
         request.files.add(await http.MultipartFile.fromPath('audios', audio));
       } else if (!(image == null) && (audio == null)) {
-        request.files.add(await http.MultipartFile.fromPath('audios', image));
+        request.files.add(await http.MultipartFile.fromPath('imagenes', image));
       }
     } else {
       request.files.add(await http.MultipartFile.fromPath('imagenes', image));
@@ -60,13 +60,13 @@ class EventService {
 
     http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print(await response.stream.bytesToString());
-      return false;
+      return true;
     }
     else {
       print(response.reasonPhrase);
-      return true;
+      return false;
     }
 
   }
