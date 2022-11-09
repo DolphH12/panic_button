@@ -10,9 +10,12 @@ void mostrarAlerta(BuildContext context, String mensaje) {
           title: const Text('Algo salió mal'),
           content: Text(mensaje),
           actions: [
-            BtnPpal(
-                textobutton: "Cerrar",
-                onPressed: () => Navigator.pop(context, 'OK')),
+            Container(
+              margin: const EdgeInsets.only(right:50, left:50, bottom: 25),
+              child: BtnPpal(
+                  textobutton: "Cerrar",
+                  onPressed: () => Navigator.pop(context, 'OK')),
+            ),
           ],
         );
       });

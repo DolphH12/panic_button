@@ -106,7 +106,7 @@ class MenuDrawer extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              "Sal de la aplicación",
+              "Salir de la aplicación",
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             trailing: const Icon(Icons.exit_to_app_rounded),

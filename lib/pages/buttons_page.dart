@@ -36,15 +36,15 @@ class SelectEmergencyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> labels = [
-      "Robo Personas",
+      "Robo a personas",
       "Riñas",
       "Secuestro",
       "Robo en vivienda",
       "Extorsión",
       "Homicidio",
-      "Robo Vehiculos",
-      "Desastres Naturales",
-      "Accidentes Transito",
+      "Robo de vehículos",
+      "Desastres naturales",
+      "Accidentes de tránsito",
     ];
 
     return SizedBox(

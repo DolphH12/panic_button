@@ -32,7 +32,7 @@ class SeeContactPage extends StatelessWidget {
       ),
       body: const ContainContacts(),
       floatingActionButton: BtnCasual(
-          textobutton: "Añadir",
+          textobutton: "Añadir contacto",
           onPressed: () => Navigator.pushNamed(context, "add"),
           width: 100,
           colorBtn: Theme.of(context).primaryColorDark),
@@ -76,9 +76,9 @@ class _ContainContactsState extends State<ContainContacts> {
                 if (snapshot.data!.isEmpty) {
                   return const Center(
                     child: MessageCardWidget(
-                        title: "¡Lo Sentimos!",
+                        title: "Aún no tienes contactos de emergencia.",
                         message:
-                            "Aun no tienes contactos, por favor agregalos."),
+                            'Agrégalos en "Añadir contactos"'),
                   );
                 } else {
                   for (var map in snapshot.data!) {
@@ -106,7 +106,7 @@ class _ContainContactsState extends State<ContainContacts> {
           ),
           //const ImageAvatar(),
           const SizedBox(
-            height: 15,
+            height: 20,
           ),
           //const CamposPerfilWidget()
         ],
@@ -130,6 +130,7 @@ class ImageAvatar extends StatelessWidget {
               color: Theme.of(context).primaryColorDark,
               borderRadius: BorderRadius.circular(100)),
         ),
+        
         const CircleAvatar(
           backgroundImage: AssetImage("assets/alert.png"),
           radius: 65,
