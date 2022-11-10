@@ -35,6 +35,14 @@ class PreferenciasUsuario {
     _prefs.setString('token', value);
   }
 
+  String get refreshToken {
+    return _prefs.getString('refreshToken') ?? '';
+  }
+
+  set refreshToken(String value) {
+    _prefs.setString('refreshToken', value);
+  }
+
   // USERNAME
   String get username {
     return _prefs.getString('username') ?? '';
@@ -76,14 +84,4 @@ class PreferenciasUsuario {
   set colorButton(Color color) {
     _prefs.setInt('colorButton', color.value);
   }
-
-   List<String> get access {
-    return _prefs.getStringList("access") ?? [];
-  }
-
-   set access(List<String> value) {
-    _prefs.setStringList("access", value);
-  }
-
-
 }

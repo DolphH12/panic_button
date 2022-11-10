@@ -16,23 +16,25 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     final prefs = PreferenciasUsuario();
-    if(prefs.token.isNotEmpty) {
-      access(prefs.access);
-      Timer(const Duration(seconds: 5),
-        () => Navigator.pushNamed(context, 'home'));
+    if (prefs.refreshToken.isNotEmpty) {
+      final ok = access(prefs.refreshToken);
+      Timer(const Duration(seconds: 5), () async {
+        if (await ok) {
+          Navigator.pushReplacementNamed(context, 'home');
+        } else {
+          Navigator.pushReplacementNamed(context, 'login');
+        }
+      });
     } else {
-       Timer(const Duration(seconds: 3),
-        () => Navigator.pushNamed(context, 'login'));
+      Timer(const Duration(seconds: 3),
+          () => Navigator.pushReplacementNamed(context, 'login'));
     }
-
-    
   }
 
-  Future<void> access(List<String> value) async {
-    await UsuarioService().login(value[0], value[1]);
+  Future<bool> access(String value) async {
+    return await UsuarioService().loginToRefresh(value);
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

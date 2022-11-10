@@ -165,16 +165,13 @@ class __FormState extends State<_Form> {
   void _onSubmit(BuildContext context) async {
     Map info = {};
     info = await usuarioService.login(userCtrl.text, passCtrl.text);
-
     if (info['ok']) {
-      prefs.access = [userCtrl.text, passCtrl.text];
       final seen = prefs.firstTime;
       Future.delayed(const Duration(seconds: 5), () {
         // Navigator.pushReplacementNamed(context, 'intro');
         if (seen) {
           Navigator.pushReplacementNamed(context, 'home');
         } else {
-          
           Navigator.pushReplacementNamed(context, 'intro');
         }
       });
