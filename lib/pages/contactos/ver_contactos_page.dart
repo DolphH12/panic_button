@@ -32,9 +32,9 @@ class SeeContactPage extends StatelessWidget {
       ),
       body: const ContainContacts(),
       floatingActionButton: BtnCasual(
-          textobutton: "Añadir",
+          textobutton: "Añadir Contactos",
           onPressed: () => Navigator.pushNamed(context, "add"),
-          width: 100,
+          width: 200,
           colorBtn: Theme.of(context).primaryColorDark),
     );
   }
