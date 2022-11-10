@@ -79,32 +79,32 @@ class _LoginPageState extends State<LoginPage> {
         ) ??
         false; //if showDialouge had returned null, then return false
   }
-    Widget _labelLogin() {
-      return Column(
-        children: [
-          const Text(
-            "¿No tiene cuenta?",
+  Widget _labelLogin() {
+    return Column(
+      children: [
+        const Text(
+          "¿No tiene cuenta?",
+          style: TextStyle(
+              color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w300),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, "register");
+          },
+          child: Text(
+            "Registrate",
             style: TextStyle(
-                color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w300),
+                color: Theme.of(context).primaryColorDark,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, "register");
-            },
-            child: Text(
-              "Registrate",
-              style: TextStyle(
-                  color: Theme.of(context).primaryColorDark,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
+  }
 
   Widget _tituloPage() {
     return Column(
