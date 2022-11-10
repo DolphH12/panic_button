@@ -34,15 +34,15 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        const SizedBox(
+                          height: 10,
+                        ),
                         _tituloPage(),
                         const _Form(),
                         const SizedBox(
                           height: 10,
                         ),
-                        const Labels(
-                            ruta: 'register',
-                            label1: '¿No tienes una cuenta?',
-                            label2: '¡Crea una ahora!'),
+                        _labelLogin(),
                         const SizedBox(
                           height: 10,
                         ),
@@ -79,6 +79,32 @@ class _LoginPageState extends State<LoginPage> {
         ) ??
         false; //if showDialouge had returned null, then return false
   }
+    Widget _labelLogin() {
+      return Column(
+        children: [
+          const Text(
+            "¿No tiene cuenta?",
+            style: TextStyle(
+                color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w300),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, "register");
+            },
+            child: Text(
+              "Registrate",
+              style: TextStyle(
+                  color: Theme.of(context).primaryColorDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      );
+    }
 
   Widget _tituloPage() {
     return Column(
@@ -89,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
           'Botón de pánico',
           style: TextStyle(
               color: Theme.of(context).primaryColor,
-              fontSize: 25,
+              fontSize: 30,
               fontWeight: FontWeight.bold),
         ),
         const SizedBox(
@@ -99,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
           tag: "initImage",
           child: Image(
             image: AssetImage('assets/alert.png'),
-            width: 150,
+            width: 140,
           ),
         )
       ],
@@ -125,7 +151,7 @@ class __FormState extends State<_Form> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 35),
       child: Column(
         children: [
           CustomInput(

@@ -121,7 +121,7 @@ class _OtpPageState extends State<OtpPage> {
                           );
 
                           mensajeInfo(context, "¡Bienvenido!",
-                              "Su registro ha sido exitoso");
+                              "Su registro ha sido exitoso.");
                         } else {
                           if (!mounted) {}
                           ScaffoldMessenger.of(context).showSnackBar(

@@ -20,13 +20,13 @@ class _HomePageState extends State<HomePage> {
       onWillPop: exitApp,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            "¡Bienvenidos!",
-            style: TextStyle(
-                fontSize: 25,
-                color: _prefs.colorButton,
-                fontWeight: FontWeight.w700),
-          ),
+          // title: Text(
+          //   "¡Bienvenidos!",
+          //   style: TextStyle(
+          //       fontSize: 25,
+          //       color: _prefs.colorButton,
+          //       fontWeight: FontWeight.w700),
+          // ),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -307,6 +307,8 @@ class ButtonPanicWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(200)),
                     )),
               ),
+
+              const SizedBox(height: 80,)
             ],
           ),
         ),

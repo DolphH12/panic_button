@@ -73,8 +73,8 @@ class _SplashPageState extends State<SplashPage> {
       alignment: AlignmentDirectional.center,
       children: [
         Container(
-          width: 300,
-          height: 300,
+          width: 200,
+          height: 200,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(500),
               color: Colors.grey[200]),
@@ -83,7 +83,7 @@ class _SplashPageState extends State<SplashPage> {
           tag: "initImage",
           child: Image(
             image: AssetImage('assets/alert.png'),
-            width: 300,
+            width: 200,
           ),
         )
       ],
