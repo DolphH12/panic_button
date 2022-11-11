@@ -164,20 +164,21 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
           Switch(
               activeColor: _prefs.colorButton,
               value: _prefs.button,
-              onChanged: (value) async {
-                _prefs.button = value;
-                if (value) {
-                  await FlutterBackground.enableBackgroundExecution();
-                  activacion.startListening();
-                } else {
-                  activacion.stopListening();
-                  if (FlutterBackground.isBackgroundExecutionEnabled) {
-                    print("Si toy");
-                    await FlutterBackground.disableBackgroundExecution();
-                  }
-                }
-                setState(() {});
-              }),
+              // onChanged: (value) async {
+              //   _prefs.button = value;
+              //   if (value) {
+              //     await FlutterBackground.enableBackgroundExecution();
+              //     activacion.startListening();
+              //   } else {
+              //     activacion.stopListening();
+              //     if (FlutterBackground.isBackgroundExecutionEnabled) {
+              //       print("Si toy");
+              //       await FlutterBackground.disableBackgroundExecution();
+              //     }
+              //   }
+              //   setState(() {});
+              // }),
+              onChanged: null),
           const Text(
             "SI",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
@@ -268,11 +269,11 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-                  "Recuerda presionar el botón de abajo en caso de emergencia.",
+                  "Presiona en caso de emergencia.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
-                      fontSize: 15,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -307,8 +308,9 @@ class ButtonPanicWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(200)),
                     )),
               ),
-
-              const SizedBox(height: 80,)
+              const SizedBox(
+                height: 80,
+              )
             ],
           ),
         ),

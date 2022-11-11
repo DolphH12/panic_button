@@ -36,7 +36,7 @@ class SelectEmergencyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<String> labels = [
-      "Robo a personas",
+      "Robo",
       "Riñas",
       "Secuestro",
       "Robo en vivienda",

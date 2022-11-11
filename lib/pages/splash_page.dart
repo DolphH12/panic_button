@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 
@@ -19,16 +20,24 @@ class _SplashPageState extends State<SplashPage> {
     if (prefs.refreshToken.isNotEmpty) {
       final ok = access(prefs.refreshToken);
       Timer(const Duration(seconds: 5), () async {
-        if (await ok) {
-          Navigator.pushReplacementNamed(context, 'home');
+        if (await check()) {
+          if (await ok) {
+            Navigator.pushReplacementNamed(context, 'home');
+          } else {
+            Navigator.pushReplacementNamed(context, 'login');
+          }
         } else {
-          Navigator.pushReplacementNamed(context, 'login');
+          Navigator.pushReplacementNamed(context, 'internet');
         }
       });
     } else {
       Timer(const Duration(seconds: 3),
           () => Navigator.pushReplacementNamed(context, 'login'));
     }
+  }
+
+  Future<bool> check() async {
+    return await InternetConnectionChecker().hasConnection;
   }
 
   Future<bool> access(String value) async {

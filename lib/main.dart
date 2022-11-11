@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:panic_app/routes/routes.dart';
+import 'package:panic_app/services/internet_service.dart';
 import 'utils/preferencias_app.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +15,7 @@ void main() async {
   await prefs.initPrefs();
   await FlutterBackground.initialize(androidConfig: androidConfig);
   await FlutterBackground.hasPermissions;
+  await checkInternet();
   runApp(const MyApp());
 }
 
@@ -44,49 +48,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Boton Panico UdeA',
       initialRoute: 'splash',
       routes: appRoutes,
+      navigatorKey: navigatorKey,
     );
   }
 }
-
-// class MyApp extends StatefulWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   State<MyApp> createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   StreamSubscription<HardwareButton>? subscription;
-
-//   String prueba = "";
-//   int ayuda2 = 0;
-//   int ayuda3 = 0;
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: const Text('Plugin example app'),
-//         ),
-//         body: Center(
-//           child: Column(
-//             children: [
-//               Text("prueba $prueba"),
-//               ElevatedButton(
-//                   onPressed: startListening,
-//                   child: const Text("Start listening")),
-//               ElevatedButton(
-//                   onPressed: stopListening,
-//                   child: const Text("Stop listening")),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

@@ -244,6 +244,6 @@ class _ConfigViewState extends State<ConfigView> {
     prefs.colorButton = pickerColor;
     Future.delayed(const Duration(seconds: 2),
         (() => Navigator.pushReplacementNamed(context, 'home')));
-    mensajeInfo(context, "¡Felicidades!", "Personalización completa");
+    mensajeInfo(context, "¡Cambio realizado!", "Personalización completa");
   }
 }
