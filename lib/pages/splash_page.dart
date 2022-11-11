@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:panic_app/bloc/bloc_perfil.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 
