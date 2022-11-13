@@ -185,6 +185,7 @@ class _ConfigViewState extends State<ConfigView> {
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();
+                                      continuedColor();
                                     },
                                     width: 100,
                                     colorBtn: Theme.of(context).primaryColor)
@@ -212,7 +213,7 @@ class _ConfigViewState extends State<ConfigView> {
                   const SizedBox(
                     height: 20,
                   ),
-                  BtnPpal(textobutton: "Cambiar", onPressed: continuedColor)
+                  //BtnPpal(textobutton: "Cambiar", onPressed: continuedColor)
                 ],
               );
   }
@@ -242,8 +243,10 @@ class _ConfigViewState extends State<ConfigView> {
 
   continuedColor() {
     prefs.colorButton = pickerColor;
-    Future.delayed(const Duration(seconds: 2),
+    mensajeInfo(context, "Cambio realizado", "");
+    Future.delayed(const Duration(seconds: 1),
         (() => Navigator.pushReplacementNamed(context, 'home')));
     mensajeInfo(context, "¡Cambio realizado!", "Personalización completa");
+
   }
 }
