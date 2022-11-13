@@ -39,6 +39,7 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   flutter_progress_hud: ^2.0.2
   geolocator: ^9.0.2
+  google_maps_flutter: ^2.2.1
   http: ^0.13.5
   image_picker: ^0.8.6
   internet_connection_checker: ^1.0.0+1
