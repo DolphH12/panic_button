@@ -111,6 +111,24 @@ class MenuDrawer extends StatelessWidget {
               const SizedBox(
                 height: 25,
               ),
+
+              ListTile(
+                title: const Text(
+                  "Visualizador de eventos",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                ),
+                subtitle: const Text(
+                  "Visualiza los eventos generados en la ciudad",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+                leading: const Icon(Icons.map),
+                onTap: () => Navigator.pushNamed(context, 'selectMap'),
+              ),
+
+              const SizedBox(
+                height: 25,
+              ),
+
               const SwicthBtnPanic(),
             ],
           ),
@@ -164,21 +182,21 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
           Switch(
               activeColor: _prefs.colorButton,
               value: _prefs.button,
-              // onChanged: (value) async {
-              //   _prefs.button = value;
-              //   if (value) {
-              //     await FlutterBackground.enableBackgroundExecution();
-              //     activacion.startListening();
-              //   } else {
-              //     activacion.stopListening();
-              //     if (FlutterBackground.isBackgroundExecutionEnabled) {
-              //       print("Si toy");
-              //       await FlutterBackground.disableBackgroundExecution();
-              //     }
-              //   }
-              //   setState(() {});
-              // }),
-              onChanged: null),
+              onChanged: (value) async {
+                _prefs.button = value;
+                if (value) {
+                  await FlutterBackground.enableBackgroundExecution();
+                  activacion.startListening();
+                } else {
+                  activacion.stopListening();
+                  if (FlutterBackground.isBackgroundExecutionEnabled) {
+                    print("Si toy");
+                    await FlutterBackground.disableBackgroundExecution();
+                  }
+                }
+                setState(() {});
+              }),
+              // onChanged: null),
           const Text(
             "SI",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
@@ -269,7 +287,9 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-                  "Presione en caso de emergencia.",
+
+                  "Presiona en caso de emergencia",
+
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,

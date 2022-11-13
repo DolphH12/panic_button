@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Boton Panico UdeA',
+      title: 'Botón pánico UdeA',
       initialRoute: 'splash',
       routes: appRoutes,
       navigatorKey: navigatorKey,
