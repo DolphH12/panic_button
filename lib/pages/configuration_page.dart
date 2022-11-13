@@ -246,7 +246,6 @@ class _ConfigViewState extends State<ConfigView> {
     mensajeInfo(context, "Cambio realizado", "");
     Future.delayed(const Duration(seconds: 1),
         (() => Navigator.pushReplacementNamed(context, 'home')));
-    mensajeInfo(context, "¡Cambio realizado!", "Personalización completa");
 
   }
 }
