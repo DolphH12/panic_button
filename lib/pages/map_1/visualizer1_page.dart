@@ -22,7 +22,7 @@ class _VisualizerPageState extends State<Visualizer1Page> {
           backgroundColor: Colors.white,
           centerTitle: true,
           title: Text(
-            "Visualizador 1",
+            "Visualizador 2",
             style: TextStyle(
               color: Theme.of(context).primaryColorDark,
               fontWeight: FontWeight.bold,
