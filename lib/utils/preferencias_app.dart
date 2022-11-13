@@ -26,6 +26,23 @@ class PreferenciasUsuario {
     _prefs = await SharedPreferences.getInstance();
   }
 
+ String get name {
+    return _prefs.getString('name') ?? '';
+  }
+
+  set name(String value) {
+    _prefs.setString('name', value);
+  }
+
+  String get lastName {
+    return _prefs.getString('lastName') ?? '';
+  }
+
+  set lastName(String value) {
+    _prefs.setString('lastName', value);
+  }
+
+
   // TOKEN
   String get token {
     return _prefs.getString('token') ?? '';

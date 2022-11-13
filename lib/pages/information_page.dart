@@ -366,25 +366,19 @@ class _StepPresentationState extends State<StepPresentation> {
 
   continued() async {
     if (currentStep == 0) {
-      if (commentCtrl.text.isNotEmpty) {
         Position position = await _determinePosition();
         print(commentCtrl.text);
         print(widget.type);
         print(position.latitude);
-        
-        await eventService.addEvent(position, widget.type, commentCtrl.text);
+        await eventService.addEvent(position, widget.type, commentCtrl.text.isEmpty ? "Sin descripción del evento." : commentCtrl.text);
         setState(() => currentStep += 1);
-      } else {
-        mensajeInfo(
-            context, "Algo salió mal", "Recuerda añadir una descripción");
-      }
     } else if (currentStep == 1) {
       final attachFilesConfirmed  = await eventService.attachFiles(image?.path, recordFilePath);
       
       if(attachFilesConfirmed) {
         if(!mounted) return;
-        mensajeInfo(context, "Envío exitoso", "Evidencias enviadas correctamente.");
         Navigator.pushNamed(context, 'home');
+        mensajeInfo(context, "Envío exitoso", "Evidencias enviadas correctamente.");
       } else {
         if(!mounted) return;
           mensajeInfo(context, "Envío fallido", "No fue posible enviar las evidencias");

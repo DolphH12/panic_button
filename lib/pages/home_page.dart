@@ -287,7 +287,9 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
+
                   "Presiona en caso de emergencia",
+
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,

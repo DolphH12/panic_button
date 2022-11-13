@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:panic_app/models/profile_model.dart';
 import 'package:panic_app/services/user_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/widgets/profile_campo_widget.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -42,21 +43,21 @@ class ContainProfile extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Column(
-        children: [
-          Text(
-            "Perfil del usuario",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontSize: 30,
-                fontWeight: FontWeight.bold),
-          ),
+        children:  [
+          // Text(
+          //   "Perfil del usuario",
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //       color: Theme.of(context).primaryColor,
+          //       fontSize: 30,
+          //       fontWeight: FontWeight.bold),
+          // ),
           const SizedBox(
-            height: 10,
+            height: 40,
           ),
-          const ImageAvatar(),
+          ImageAvatar(),
           const SizedBox(
-            height: 15,
+            height: 40,
           ),
           const CamposPerfilWidget()
         ],
@@ -66,7 +67,9 @@ class ContainProfile extends StatelessWidget {
 }
 
 class ImageAvatar extends StatelessWidget {
-  const ImageAvatar({super.key});
+  ImageAvatar({super.key});
+  
+  final PreferenciasUsuario prefs = PreferenciasUsuario();
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +80,7 @@ class ImageAvatar extends StatelessWidget {
           width: 150,
           height: 150,
           decoration: BoxDecoration(
-              color: Theme.of(context).primaryColorDark,
+              color: prefs.colorButton,
               borderRadius: BorderRadius.circular(100)),
         ),
         const CircleAvatar(

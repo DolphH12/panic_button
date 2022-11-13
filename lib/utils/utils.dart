@@ -27,7 +27,7 @@ void mensajeInfo(BuildContext context, String titulo, String mensaje) {
       builder: (context) {
         return AlertDialog(
           title: Text(titulo),
-          content: Text(mensaje),
+          content: mensaje!="" ?Text(mensaje): null,
         );
       });
 }

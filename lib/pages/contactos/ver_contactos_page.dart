@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:panic_app/models/contacts_model.dart';
 import 'package:panic_app/models/user_general_model.dart';
 import 'package:panic_app/services/contact_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/widgets/btn_casual.dart';
 import 'package:panic_app/widgets/contact_widget.dart';
 import 'package:panic_app/widgets/message_card.dart';
 
 class SeeContactPage extends StatelessWidget {
-  const SeeContactPage({Key? key}) : super(key: key);
+  SeeContactPage({Key? key}) : super(key: key);
 
+  final PreferenciasUsuario prefs = PreferenciasUsuario();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +37,7 @@ class SeeContactPage extends StatelessWidget {
           textobutton: "Añadir contactos",
           onPressed: () => Navigator.pushNamed(context, "add"),
           width: 200,
-          colorBtn: Theme.of(context).primaryColorDark),
+          colorBtn: prefs.colorButton),
     );
   }
 }
@@ -51,6 +53,9 @@ class ContainContacts extends StatefulWidget {
 
 class _ContainContactsState extends State<ContainContacts> {
   ContactService contactService = ContactService();
+
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+
   List<ContactModel> contacts = [];
   @override
   Widget build(BuildContext context) {
@@ -62,7 +67,7 @@ class _ContainContactsState extends State<ContainContacts> {
             "Contactos",
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Theme.of(context).primaryColor,
+                color: prefs.colorButton,
                 fontSize: 30,
                 fontWeight: FontWeight.bold),
           ),
