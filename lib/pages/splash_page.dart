@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:panic_app/bloc/bloc_perfil.dart';
+import 'package:panic_app/services/user_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -12,9 +16,33 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
-    Timer(const Duration(seconds: 3),
-        () => Navigator.pushNamed(context, 'login'));
     super.initState();
+    final prefs = PreferenciasUsuario();
+    if (prefs.refreshToken.isNotEmpty) {
+      final ok = access(prefs.refreshToken);
+      Timer(const Duration(seconds: 5), () async {
+        if (await check()) {
+          if (await ok) {
+            Navigator.pushReplacementNamed(context, 'home');
+          } else {
+            Navigator.pushReplacementNamed(context, 'login');
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, 'internet');
+        }
+      });
+    } else {
+      Timer(const Duration(seconds: 3),
+          () => Navigator.pushReplacementNamed(context, 'login'));
+    }
+  }
+
+  Future<bool> check() async {
+    return await InternetConnectionChecker().hasConnection;
+  }
+
+  Future<bool> access(String value) async {
+    return await UsuarioService().loginToRefresh(value);
   }
 
   @override
@@ -42,7 +70,7 @@ class _SplashPageState extends State<SplashPage> {
 
   Widget _tituloApp() {
     return Text(
-      'Botón de Panico',
+      'Botón de pánico',
       style: TextStyle(
           color: Theme.of(context).primaryColor,
           fontSize: 30,
@@ -55,8 +83,8 @@ class _SplashPageState extends State<SplashPage> {
       alignment: AlignmentDirectional.center,
       children: [
         Container(
-          width: 300,
-          height: 300,
+          width: 200,
+          height: 200,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(500),
               color: Colors.grey[200]),
@@ -65,7 +93,7 @@ class _SplashPageState extends State<SplashPage> {
           tag: "initImage",
           child: Image(
             image: AssetImage('assets/alert.png'),
-            width: 300,
+            width: 200,
           ),
         )
       ],

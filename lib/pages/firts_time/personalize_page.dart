@@ -30,7 +30,7 @@ class ContainPersonalize extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Personaliza tu Boton",
+          "Personaliza tu bóton",
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Theme.of(context).primaryColor,
@@ -71,11 +71,11 @@ class _StepPersonalizeState extends State<StepPersonalize> {
         onStepCancel: () => cancel,
         steps: [
           Step(
-              title: const Text("Seleccionar Color"),
+              title: const Text("Seleccionar color"),
               content: Column(
                 children: [
                   BtnCasual(
-                      textobutton: 'Selecciona Color',
+                      textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -124,11 +124,11 @@ class _StepPersonalizeState extends State<StepPersonalize> {
               isActive: currentStep > 0,
               state: currentStep > 0 ? StepState.complete : StepState.disabled),
           Step(
-              title: const Text("Codigo de confirmación"),
+              title: const Text("Código de confirmación"),
               content: Column(
                 children: const [
                   Text(
-                    "Esta ha sido la configuracion... Continua para disfrutar de nuestra app",
+                    "Esta ha sido la configuración... Continua para disfrutar de nuestra app",
                     style: TextStyle(
                         color: Colors.black54,
                         fontSize: 18,

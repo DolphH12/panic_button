@@ -17,7 +17,7 @@ class ProfileCampoWidget extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 15),
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.1),

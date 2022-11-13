@@ -12,6 +12,7 @@ import 'package:panic_app/widgets/btn_ppal.dart';
 import 'package:panic_app/widgets/custom_input.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record_mp3/record_mp3.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class InformationPage extends StatelessWidget {
   const InformationPage({Key? key}) : super(key: key);
@@ -19,6 +20,8 @@ class InformationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int args = ModalRoute.of(context)!.settings.arguments as int;
+    final position;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -60,7 +63,7 @@ class ContainPresentation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Agrega Información",
+          "Agrega información",
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Theme.of(context).primaryColor,
@@ -173,14 +176,21 @@ class _StepPresentationState extends State<StepPresentation> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   BtnCasual(
-                                      textobutton: "Camara",
-                                      onPressed: () => selectImage(1),
+                                      textobutton: "Cámara",
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        selectImage(1);
+                                      },
                                       width: 100,
                                       colorBtn:
                                           Theme.of(context).primaryColorDark),
+                                  const SizedBox(height: 15,),
                                   BtnCasual(
                                       textobutton: "Galeria",
-                                      onPressed: () => selectImage(2),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        selectImage(2);
+                                      },
                                       width: 100,
                                       colorBtn:
                                           Theme.of(context).primaryColorDark)
@@ -204,8 +214,8 @@ class _StepPresentationState extends State<StepPresentation> {
                   ),
                   image != null
                       ? SizedBox(
-                          width: 200,
-                          height: 200,
+                          width: 300,
+                          height: 300,
                           child: Image.file(
                             image!,
                             fit: BoxFit.cover,
@@ -224,26 +234,36 @@ class _StepPresentationState extends State<StepPresentation> {
                           "*Graba un audio contando lo ocurrido",
                           style: TextStyle(color: Colors.black54),
                         ),
-                        const SizedBox(height: 10),
+
+                        const SizedBox(height: 20),
+
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Theme.of(context).primaryColorDark,
                               elevation: 7),
-                          child: Icon(
-                            isRecording ? Icons.stop : Icons.mic,
-                            size: 50,
-                            color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 8),
+                            child: Icon(
+                              isRecording ? Icons.stop : Icons.mic,
+                              size: 40,
+                              color: Colors.white,
+                            ),
                           ),
                           onPressed: () async {
                             if (isRecording) {
                               stopRecord();
+                              position = const Duration(seconds: 0);
+                              setState(() {
+                                
+                              });
                             } else {
                               boolButton = true;
                               startRecord();
                             }
                           },
                         ),
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -266,6 +286,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                 iconSize: 25,
                               ),
                             ),
+                            
                             SizedBox(
                               width: 200,
                               child: Column(
@@ -278,7 +299,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                     max: duration.inSeconds.toDouble(),
                                     value: position.inSeconds.toDouble(),
                                     onChanged: (value) async {
-                                      final position =
+                                      position =
                                           Duration(seconds: value.toInt());
                                       await audioPlayer.seek(position);
                                       await audioPlayer.resume();
@@ -345,19 +366,23 @@ class _StepPresentationState extends State<StepPresentation> {
 
   continued() async {
     if (currentStep == 0) {
-      if (commentCtrl.text.isNotEmpty) {
         Position position = await _determinePosition();
         print(commentCtrl.text);
         print(widget.type);
         print(position.latitude);
-        await eventService.addEvent(position, widget.type, commentCtrl.text);
+        await eventService.addEvent(position, widget.type, commentCtrl.text.isEmpty ? "Sin descripción del evento." : commentCtrl.text);
         setState(() => currentStep += 1);
-      } else {
-        mensajeInfo(
-            context, "Algo salio Mal", "Recuerda añadir una descripción");
-      }
     } else if (currentStep == 1) {
-      Navigator.pushNamed(context, 'home');
+      final attachFilesConfirmed  = await eventService.attachFiles(image?.path, recordFilePath);
+      
+      if(attachFilesConfirmed) {
+        if(!mounted) return;
+        Navigator.pushNamed(context, 'home');
+        mensajeInfo(context, "Envío exitoso", "Evidencias enviadas correctamente.");
+      } else {
+        if(!mounted) return;
+          mensajeInfo(context, "Envío fallido", "No fue posible enviar las evidencias");
+      }
     }
   }
 
@@ -376,15 +401,31 @@ class _StepPresentationState extends State<StepPresentation> {
     return "$sdPath/test_${prefs.audio}.mp3";
   }
 
+  Future<bool> checkPermission() async {
+    if (!await Permission.microphone.isGranted) {
+      PermissionStatus status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   void startRecord() async {
-    statusText = "Recording...";
-    recordFilePath = await getFilePath();
-    isComplete = false;
-    isRecording = true;
-    RecordMp3.instance.start(recordFilePath!, (type) {
-      statusText = "Record error--->$type";
-      setState(() {});
+    bool hasPermission = await checkPermission();
+     if (hasPermission) {
+      statusText = "Recording...";
+      recordFilePath = await getFilePath();
+      isComplete = false;
+      isRecording = true;
+      RecordMp3.instance.start(recordFilePath!, (type) {
+        statusText = "Record error--->$type";
+        setState(() {});
     });
+  } else {
+      if(!mounted) return;
+      mensajeInfo(context, "Error de permisos", "Es necesario autorizar los permisos de micrófono para grabar audio.");
+  }
     setState(() {});
   }
 

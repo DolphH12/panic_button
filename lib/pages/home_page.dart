@@ -5,30 +5,44 @@ import 'package:panic_app/services/background_service.dart';
 //import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PreferenciasUsuario _prefs = PreferenciasUsuario();
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "¡Bienvenidos!",
-          style: TextStyle(
-              fontSize: 25,
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.w700),
+    return WillPopScope(
+      onWillPop: exitApp,
+      child: Scaffold(
+        appBar: AppBar(
+          // title: Text(
+          //   "¡Bienvenidos!",
+          //   style: TextStyle(
+          //       fontSize: 25,
+          //       color: _prefs.colorButton,
+          //       fontWeight: FontWeight.w700),
+          // ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: Colors.black,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          iconTheme: const IconThemeData(size: 40),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        iconTheme: const IconThemeData(size: 40),
+        body: const ButtonPanicWidget(),
+        drawer: const MenuDrawer(),
       ),
-      body: const ButtonPanicWidget(),
-      drawer: const MenuDrawer(),
     );
+  }
+
+  Future<bool> exitApp() async {
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    return true;
   }
 }
 
@@ -106,11 +120,15 @@ class MenuDrawer extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             subtitle: const Text(
-              "Sal de la aplicación",
+              "Salir de la aplicación",
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             trailing: const Icon(Icons.exit_to_app_rounded),
-            onTap: () => Navigator.pushReplacementNamed(context, 'login'),
+            onTap: () {
+              prefs.token = "";
+              prefs.refreshToken = "";
+              Navigator.pushReplacementNamed(context, 'login');
+            },
           )
         ],
       ),
@@ -134,7 +152,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text(
-        "Boton Externo",
+        "Botón externo",
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
       subtitle: Row(
@@ -146,20 +164,21 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
           Switch(
               activeColor: _prefs.colorButton,
               value: _prefs.button,
-              onChanged: (value) async {
-                _prefs.button = value;
-                if (value) {
-                  await FlutterBackground.enableBackgroundExecution();
-                  activacion.startListening();
-                } else {
-                  activacion.stopListening();
-                  if (FlutterBackground.isBackgroundExecutionEnabled) {
-                    print("Si toy");
-                    await FlutterBackground.disableBackgroundExecution();
-                  }
-                }
-                setState(() {});
-              }),
+              // onChanged: (value) async {
+              //   _prefs.button = value;
+              //   if (value) {
+              //     await FlutterBackground.enableBackgroundExecution();
+              //     activacion.startListening();
+              //   } else {
+              //     activacion.stopListening();
+              //     if (FlutterBackground.isBackgroundExecutionEnabled) {
+              //       print("Si toy");
+              //       await FlutterBackground.disableBackgroundExecution();
+              //     }
+              //   }
+              //   setState(() {});
+              // }),
+              onChanged: null),
           const Text(
             "SI",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
@@ -229,10 +248,10 @@ class ButtonPanicWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Boton de Panico",
+                "Botón de pánico",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: prefs.colorButton,
                     fontSize: 40,
                     fontWeight: FontWeight.bold),
               ),
@@ -240,7 +259,7 @@ class ButtonPanicWidget extends StatelessWidget {
                 "Usuario ${prefs.username}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColorDark,
+                    color: prefs.colorButton.withOpacity(0.8),
                     fontSize: 25,
                     fontWeight: FontWeight.bold),
               ),
@@ -250,10 +269,11 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-                  "Recuerda presionar el boton de abajo en caso de emergencia.",
+                  "Presione en caso de emergencia.",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
-                      fontSize: 15,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
               ),
@@ -288,6 +308,9 @@ class ButtonPanicWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(200)),
                     )),
               ),
+              const SizedBox(
+                height: 80,
+              )
             ],
           ),
         ),

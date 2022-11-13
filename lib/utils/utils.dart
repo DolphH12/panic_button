@@ -7,12 +7,15 @@ void mostrarAlerta(BuildContext context, String mensaje) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Algo salio mal'),
+          title: const Text('Algo salió mal'),
           content: Text(mensaje),
           actions: [
-            BtnPpal(
-                textobutton: "Cerrar",
-                onPressed: () => Navigator.pop(context, 'OK')),
+            Container(
+              margin: const EdgeInsets.only(right:50, left:50, bottom: 25),
+              child: BtnPpal(
+                  textobutton: "Cerrar",
+                  onPressed: () => Navigator.pop(context, 'OK')),
+            ),
           ],
         );
       });
@@ -24,7 +27,7 @@ void mensajeInfo(BuildContext context, String titulo, String mensaje) {
       builder: (context) {
         return AlertDialog(
           title: Text(titulo),
-          content: Text(mensaje),
+          content: mensaje!="" ?Text(mensaje): null,
         );
       });
 }

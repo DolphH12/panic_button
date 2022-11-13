@@ -7,6 +7,7 @@ import 'package:panic_app/pages/firts_time/personalize_page.dart';
 import 'package:panic_app/pages/firts_time/presentate_page.dart';
 import 'package:panic_app/pages/home_page.dart';
 import 'package:panic_app/pages/information_page.dart';
+import 'package:panic_app/pages/internet_failed_page.dart';
 import 'package:panic_app/pages/profile_page.dart';
 import '../pages/firts_time/intro_page.dart';
 import '../pages/login_page.dart';
@@ -26,9 +27,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'selectEmergency': (_) => const ButtonsPage(),
   'information': (_) => const InformationPage(),
   'profile': (_) => const ProfilePage(),
-  'contacts': (_) => const SeeContactPage(),
+  'contacts': (_) => SeeContactPage(),
   'add': (_) => const AddContactPage(),
   'config': (_) => const ConfigurationPage(),
+  'internet': (_) => const InternetFailedPage(),
   // 'proyectos': (_) => const ProyectosPage(),
   // 'info': (_) => const InformationPage(),
   // 'participate': (_) => const ParticipatePage(),

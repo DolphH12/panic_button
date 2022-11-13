@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
-
 import '../utils/utils.dart';
 import '../widgets/btn_ppal.dart';
 import '../widgets/custom_input.dart';
@@ -35,17 +34,13 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _tituloPage(),
-                        const _Form(),
                         const SizedBox(
                           height: 10,
                         ),
-                        const Labels(
-                            ruta: 'register',
-                            label1: '¿No tienes una cuenta?',
-                            label2: '¡Crea una ahora!'),
+                        _tituloPage(),
+                        const _Form(),
                         const SizedBox(
-                          height: 10,
+                          height: 1,
                         ),
                       ],
                     ),
@@ -61,8 +56,8 @@ class _LoginPageState extends State<LoginPage> {
           //the return value will be from "Yes" or "No" options
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Boton de Panico'),
-            content: const Text('Quieres salir de la app?'),
+            title: const Text('Botón de pánico'),
+            content: const Text('¿Quieres salir de la app?'),
             actions: [
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -81,16 +76,18 @@ class _LoginPageState extends State<LoginPage> {
         false; //if showDialouge had returned null, then return false
   }
 
+  
+
   Widget _tituloPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Boton de panico',
+          'Botón de pánico',
           style: TextStyle(
               color: Theme.of(context).primaryColor,
-              fontSize: 25,
+              fontSize: 30,
               fontWeight: FontWeight.bold),
         ),
         const SizedBox(
@@ -100,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
           tag: "initImage",
           child: Image(
             image: AssetImage('assets/alert.png'),
-            width: 150,
+            width: 140,
           ),
         )
       ],
@@ -122,11 +119,40 @@ class __FormState extends State<_Form> {
   UsuarioService usuarioService = UsuarioService();
   PreferenciasUsuario prefs = PreferenciasUsuario();
 
+
+   Widget _labelLogin() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "¿No tiene cuenta? ",
+          style: TextStyle(
+              color: Colors.black54, fontSize: 16, fontWeight: FontWeight.w300),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, "register");
+          },
+          child: Text(
+            "Registrate",
+            style: TextStyle(
+                color: Theme.of(context).primaryColorDark,
+                fontSize: 16,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 35),
       child: Column(
         children: [
           CustomInput(
@@ -145,7 +171,7 @@ class __FormState extends State<_Form> {
             height: 20,
           ),
           BtnPpal(
-            textobutton: 'Iniciar Sesión',
+            textobutton: 'Iniciar sesión',
             onPressed: () {
               final progress = ProgressHUD.of(context);
               _onSubmit(context);
@@ -158,6 +184,7 @@ class __FormState extends State<_Form> {
           const SizedBox(
             height: 20,
           ),
+          _labelLogin(),
         ],
       ),
     );
@@ -166,7 +193,6 @@ class __FormState extends State<_Form> {
   void _onSubmit(BuildContext context) async {
     Map info = {};
     info = await usuarioService.login(userCtrl.text, passCtrl.text);
-
     if (info['ok']) {
       final seen = prefs.firstTime;
       Future.delayed(const Duration(seconds: 5), () {
@@ -174,7 +200,6 @@ class __FormState extends State<_Form> {
         if (seen) {
           Navigator.pushReplacementNamed(context, 'home');
         } else {
-          prefs.firstTime = true;
           Navigator.pushReplacementNamed(context, 'intro');
         }
       });
