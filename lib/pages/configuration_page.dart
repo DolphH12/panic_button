@@ -72,7 +72,7 @@ class _ContainConfigurationState extends State<ContainConfiguration> {
             height: 20,
           ),
           Configs(
-            title: "Boton",
+            title: "Batón",
             subtitle: "Cambia el color",
             icon: Icons.radio_button_checked,
             onPressed: () {

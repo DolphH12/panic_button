@@ -117,26 +117,67 @@ class EventService {
   }
 
     Future<Map<String, dynamic>> eventMedia(String userId) async {
-    print("LELEGUE");
-    var headers = {
+      print("LLEGUE");
+      var headers = {
+        'Authorization': 'Bearer ${_prefs.token}'
+      };
+      var request = http.Request('GET', Uri.parse('$ip/reto/events/files/obtener/$userId'));
+
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+
+      final Map<String, dynamic> decodeData = jsonDecode(await response.stream.bytesToString());
+
+      if (response.statusCode == 200) {
+        print("TERMINÉ");
+        return decodeData;
+      }
+      else {
+        print(response.reasonPhrase);
+      }
+
+      return {'error' : 'No fue posible recuperar los archivos'};
+  }
+
+  Future<Map<String, dynamic>> getEvents() async {
+     var headers = {
+      'Authorization': 'Bearer ${_prefs.token}',
+      'Cookie': 'color=rojo'
+    };
+
+    try{
+      var request = http.Request('GET', Uri.parse('$ip/reto/events/eventos/listar'));
+      request.headers.addAll(headers);
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode != 200) throw Exception('${response.statusCode}');
+
+      return {'status': true, 'data': jsonDecode(await response.stream.bytesToString())};
+
+    } catch (e) {
+      return {
+        'status': false,
+        'data': {'message': e.toString()}
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getZones() async {
+     var headers = {
       'Authorization': 'Bearer ${_prefs.token}'
     };
-    var request = http.Request('GET', Uri.parse('$ip/reto/events/files/obtener/$userId'));
 
-    request.headers.addAll(headers);
+    try {
+      final response = await http.get(Uri.parse('http://sistemic.udea.edu.co:4000/reto/zonas/zonas/listar'),headers: headers);
 
-    http.StreamedResponse response = await request.send();
+      if (response.statusCode != 200) throw Exception('${response.statusCode}');
 
-    final Map<String, dynamic> decodeData = jsonDecode(await response.stream.bytesToString());
-
-    if (response.statusCode == 200) {
-      print("TERMINÉ");
-      return decodeData;
+      return {'status': true, 'data': jsonDecode(response.body)};
+    } catch (e) {
+      return {
+        'status': false,
+        'data': {'message': e.toString()}
+      };
     }
-    else {
-      print(response.reasonPhrase);
-    }
-
-    return {'error' : 'No fue posible recuperar los archivos'};
   }
 }
