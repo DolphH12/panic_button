@@ -189,15 +189,16 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               onChanged: (value) async {
                 _prefs.button = value;
                 if (value) {
-                  await FlutterBackground.enableBackgroundExecution();
+
+                  // await FlutterBackground.enableBackgroundExecution();
                   activacion.startListening();
                 } else {
                   activacion.stopListening();
                   
-                  if (FlutterBackground.isBackgroundExecutionEnabled) {
-                    print("Si toy");
-                    await FlutterBackground.disableBackgroundExecution();
-                  }
+                  // if (FlutterBackground.isBackgroundExecutionEnabled) {
+                  //   print("Si toy");
+                  //   await FlutterBackground.disableBackgroundExecution();
+                  // }
                 }
                 setState(() {});
               }),
