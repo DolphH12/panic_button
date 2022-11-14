@@ -10,6 +10,7 @@ import 'package:panic_app/pages/information_page.dart';
 import 'package:panic_app/pages/internet_failed_page.dart';
 import 'package:panic_app/pages/map_1/detail1_page.dart';
 import 'package:panic_app/pages/map_1/visualizer1_page.dart';
+import 'package:panic_app/pages/map_2/visualizer2_page.dart';
 import 'package:panic_app/pages/profile_page.dart';
 import 'package:panic_app/pages/select_map_page.dart';
 import '../pages/firts_time/intro_page.dart';
@@ -37,6 +38,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'selectMap': (_) => const SelectMapPage(),
   'map1': (_) => const Visualizer1Page(),
   'detail1': (_) => const Detail1Page(),
+  'map2': (_) => const Visualizer2Page(),
   
   // 'proyectos': (_) => const ProyectosPage(),
   // 'info': (_) => const InformationPage(),
