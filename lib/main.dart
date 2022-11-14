@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:panic_app/routes/routes.dart';
+import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/services/internet_service.dart';
 import 'utils/preferencias_app.dart';
 
@@ -16,6 +17,9 @@ void main() async {
   await FlutterBackground.initialize(androidConfig: androidConfig);
   await FlutterBackground.hasPermissions;
   await checkInternet();
+  if(prefs.button == true){
+    activacion.startListening();
+  }
   runApp(const MyApp());
 }
 

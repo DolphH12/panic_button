@@ -9,7 +9,7 @@ class EventService {
   final _prefs = PreferenciasUsuario();
   final ip = 'http://sistemic.udea.edu.co:4000';
 
-  Future<void> addEvent(Position location, int type, String comment) async {
+  Future<String> addEvent(Position location, int type, String comment) async {
     final username = _prefs.username;
     var headers = {
       'Authorization': 'Bearer ${_prefs.token}',
@@ -29,7 +29,9 @@ class EventService {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
+      return "ok";
     } else {
+      return "";
       print(response.reasonPhrase);
     }
   }

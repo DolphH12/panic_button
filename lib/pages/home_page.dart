@@ -55,100 +55,102 @@ class MenuDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     PreferenciasUsuario prefs = PreferenciasUsuario();
     return Drawer(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ListView(
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            children: [
-              TituloDrawer(prefs: prefs),
-              const SizedBox(
-                height: 25,
-              ),
-              ListTile(
-                title: const Text(
-                  "Perfil",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              children: [
+                TituloDrawer(prefs: prefs),
+                const SizedBox(
+                  height: 25,
                 ),
-                subtitle: const Text(
-                  "Revisa tu información",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ListTile(
+                  title: const Text(
+                    "Perfil",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text(
+                    "Revisa tu información",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  leading: const Icon(Icons.person),
+                  onTap: () => Navigator.pushNamed(context, 'profile'),
                 ),
-                leading: const Icon(Icons.person),
-                onTap: () => Navigator.pushNamed(context, 'profile'),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              ListTile(
-                title: const Text(
-                  "Contactos",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                const SizedBox(
+                  height: 25,
                 ),
-                subtitle: const Text(
-                  "Agrega tus contactos de emergencia",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ListTile(
+                  title: const Text(
+                    "Contactos",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text(
+                    "Agrega tus contactos de emergencia",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  leading: const Icon(Icons.person_add_rounded),
+                  onTap: () => Navigator.pushNamed(context, 'contacts'),
                 ),
-                leading: const Icon(Icons.person_add_rounded),
-                onTap: () => Navigator.pushNamed(context, 'contacts'),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              ListTile(
-                title: const Text(
-                  "Configuración",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                const SizedBox(
+                  height: 25,
                 ),
-                subtitle: const Text(
-                  "Configura nuevamente tu cuenta",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ListTile(
+                  title: const Text(
+                    "Configuración",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text(
+                    "Configura nuevamente tu cuenta",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  leading: const Icon(Icons.settings),
+                  onTap: () => Navigator.pushNamed(context, 'config'),
                 ),
-                leading: const Icon(Icons.settings),
-                onTap: () => Navigator.pushNamed(context, 'config'),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-
-              ListTile(
-                title: const Text(
-                  "Visualizador de eventos",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                const SizedBox(
+                  height: 25,
                 ),
-                subtitle: const Text(
-                  "Visualiza los eventos generados en la ciudad",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+      
+                ListTile(
+                  title: const Text(
+                    "Visualizador de eventos",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text(
+                    "Visualiza los eventos generados en la ciudad",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  leading: const Icon(Icons.map),
+                  onTap: () => Navigator.pushNamed(context, 'selectMap'),
                 ),
-                leading: const Icon(Icons.map),
-                onTap: () => Navigator.pushNamed(context, 'selectMap'),
-              ),
-
-              const SizedBox(
-                height: 25,
-              ),
-
-              const SwicthBtnPanic(),
-            ],
-          ),
-          ListTile(
-            title: const Text(
-              "Cerrar sesión",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      
+                const SizedBox(
+                  height: 25,
+                ),
+      
+                const SwicthBtnPanic(),
+              ],
             ),
-            subtitle: const Text(
-              "Salir de la aplicación",
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-            trailing: const Icon(Icons.exit_to_app_rounded),
-            onTap: () {
-              prefs.token = "";
-              prefs.refreshToken = "";
-              Navigator.pushReplacementNamed(context, 'login');
-            },
-          )
-        ],
+            ListTile(
+              title: const Text(
+                "Cerrar sesión",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+              subtitle: const Text(
+                "Salir de la aplicación",
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+              trailing: const Icon(Icons.exit_to_app_rounded),
+              onTap: () {
+                prefs.token = "";
+                prefs.refreshToken = "";
+                Navigator.pushReplacementNamed(context, 'login');
+              },
+            )
+          ],
+        ),
       ),
     );
   }
@@ -165,6 +167,8 @@ class SwicthBtnPanic extends StatefulWidget {
 
 class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   final PreferenciasUsuario _prefs = PreferenciasUsuario();
+
+
   String text = "Start Service";
   @override
   Widget build(BuildContext context) {
@@ -189,6 +193,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
                   activacion.startListening();
                 } else {
                   activacion.stopListening();
+                  
                   if (FlutterBackground.isBackgroundExecutionEnabled) {
                     print("Si toy");
                     await FlutterBackground.disableBackgroundExecution();
