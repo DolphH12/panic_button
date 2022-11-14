@@ -1,16 +1,19 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:panic_app/main.dart';
+import 'package:panic_app/pages/home_page.dart';
 import 'package:panic_app/services/event_services.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
 
 class ActivacionBotton {
-  PreferenciasUsuario _prefs =  new PreferenciasUsuario();
+  
+  final PreferenciasUsuario _prefs = PreferenciasUsuario();
   late StreamSubscription<HardwareButton> subscription;
+
+  
   int counter = 0;
   void startListening() {
     subscription = FlutterAndroidVolumeKeydown.stream.listen((event) {
@@ -31,6 +34,7 @@ class ActivacionBotton {
 
   void stopListening() {
       subscription.cancel();
+      
   }
 
   Future<Position> _determinePosition() async {
@@ -70,21 +74,21 @@ class ActivacionBotton {
     return await Geolocator.getCurrentPosition();
   }
 
-
   void _message() async{
     Position position = await _determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, botones de volumen");
     if(buttonemergency =="ok"){
       print("enviado");
-      }
-
-
-    var context  =  navigatorKey.currentContext;
-    mensajeInfo(context!,  "Alerta de emergencia enviada!", "");
+      var context  =  navigatorKey.currentContext;
+      mensajeInfo(context!,  "Alerta de emergencia enviada!", "");
+    }
+    
     
   }
 
 }
+
+
 EventService eventService =  new EventService();
 ActivacionBotton activacion = ActivacionBotton();
 

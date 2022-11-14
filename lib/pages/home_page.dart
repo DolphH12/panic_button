@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:panic_app/services/background_service.dart';
-//import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import '../utils/utils.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -168,8 +173,107 @@ class SwicthBtnPanic extends StatefulWidget {
 class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   final PreferenciasUsuario _prefs = PreferenciasUsuario();
 
-
+  var _speech = stt.SpeechToText();
+  String _text = "";
+  Timer? timer;
+  int seconds = 3;
+  int confirm = 0;
   String text = "Start Service";
+  
+  void stopVoice() {
+    _text = "";
+    timer?.cancel();
+    _speech.stop();
+    setState(() {});
+  }
+
+  void startTimer() {
+    confirm = 0;
+    _text = "";
+    timer = Timer.periodic(const Duration(seconds: 1), (_) { 
+      setState(() => seconds--);
+      if(seconds == 0) {
+        _listen();
+        seconds = 3;
+      }
+      // print(seconds);
+    });
+  }
+  
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> emergenciaVoz() async {
+    print("hola");
+    Position position = await _determinePosition();
+    final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
+    print(buttonemergency);
+    if(buttonemergency == 'ok') {
+      if(!mounted) return;
+      mensajeInfo(context, "Emergencia por voz", "Emergencia generada correctamente.");
+    }
+  }
+
+  void _listen() async {
+    bool available = await _speech.initialize(
+        onStatus: (value) async => {
+          print("onStatusR: $value"),
+          print("confirm en $confirm"),
+          if((value == "done" && confirm == 2)) {
+            emergenciaVoz(),
+            print("Emergencia"),
+            confirm = 0
+          }
+        },
+        onError: (value) => print("onStatusERROR: $value"));
+    
+    if(available){
+      _speech.listen(
+        onResult: (value) => setState(() {
+          _text = value.recognizedWords;
+          if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
+            confirm ++;   
+            print(confirm);    
+            _text = "";
+            timer?.cancel();
+             _speech.stop();
+             _prefs.button = false;
+             activacion.stopListening();
+            setState(() {});
+          }
+        }),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -191,8 +295,10 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
                 if (value) {
                   await FlutterBackground.enableBackgroundExecution();
                   activacion.startListening();
+                  startTimer();
                 } else {
                   activacion.stopListening();
+                  stopVoice();
                   
                   if (FlutterBackground.isBackgroundExecutionEnabled) {
                     print("Si toy");
@@ -213,6 +319,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
     );
   }
 }
+
 
 class TituloDrawer extends StatelessWidget {
   const TituloDrawer({
@@ -236,12 +343,12 @@ class TituloDrawer extends StatelessWidget {
         child: Column(
           children: [
             const CircleAvatar(
-              backgroundImage: AssetImage("assets/alert.png"),
-              radius: 40,
+              backgroundImage: AssetImage("assets/usuario.png"),
+              radius: 45,
               backgroundColor: Colors.white,
             ),
             const SizedBox(
-              height: 20,
+              height: 10,
             ),
             Text(
               prefs.username,

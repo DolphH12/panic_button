@@ -49,6 +49,7 @@ dependencies:
   permission_handler: ^10.2.0
   record_mp3: ^3.0.0
   shared_preferences: ^2.0.15
+  speech_to_text: ^6.1.0
   syncfusion_flutter_maps: ^20.3.56
 
 dev_dependencies:

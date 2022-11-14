@@ -37,7 +37,7 @@ class SeeContactPage extends StatelessWidget {
           textobutton: "Añadir contactos",
           onPressed: () => Navigator.pushNamed(context, "add"),
           width: 200,
-          colorBtn: prefs.colorButton),
+          colorBtn: Theme.of(context).primaryColorDark),
     );
   }
 }
@@ -67,7 +67,7 @@ class _ContainContactsState extends State<ContainContacts> {
             "Contactos",
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: prefs.colorButton,
+                color: Theme.of(context).primaryColorDark,
                 fontSize: 30,
                 fontWeight: FontWeight.bold),
           ),
@@ -137,7 +137,7 @@ class ImageAvatar extends StatelessWidget {
         ),
         
         const CircleAvatar(
-          backgroundImage: AssetImage("assets/alert.png"),
+          backgroundImage: AssetImage("assets/usuario.png"),
           radius: 65,
           backgroundColor: Colors.white,
         ),

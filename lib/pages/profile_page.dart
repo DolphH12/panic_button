@@ -80,11 +80,11 @@ class ImageAvatar extends StatelessWidget {
           width: 150,
           height: 150,
           decoration: BoxDecoration(
-              color: prefs.colorButton,
+              color: Theme.of(context).primaryColorDark,
               borderRadius: BorderRadius.circular(100)),
         ),
         const CircleAvatar(
-          backgroundImage: AssetImage("assets/alert.png"),
+          backgroundImage: AssetImage("assets/usuario.png"),
           radius: 65,
           backgroundColor: Colors.white,
         ),
