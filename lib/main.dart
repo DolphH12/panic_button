@@ -14,10 +14,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = PreferenciasUsuario();
   await prefs.initPrefs();
-  await FlutterBackground.initialize(androidConfig: androidConfig);
-  await FlutterBackground.hasPermissions;
   await checkInternet();
-  if(prefs.button == true){
+  if (prefs.button == true) {
     activacion.startListening();
   }
   runApp(const MyApp());

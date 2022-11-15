@@ -117,7 +117,6 @@ class MenuDrawer extends StatelessWidget {
                 const SizedBox(
                   height: 25,
                 ),
-      
                 ListTile(
                   title: const Text(
                     "Visualizador de eventos",
@@ -130,11 +129,9 @@ class MenuDrawer extends StatelessWidget {
                   leading: const Icon(Icons.map),
                   onTap: () => Navigator.pushNamed(context, 'selectMap'),
                 ),
-      
                 const SizedBox(
                   height: 25,
                 ),
-      
                 const SwicthBtnPanic(),
               ],
             ),
@@ -179,7 +176,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   int seconds = 3;
   int confirm = 0;
   String text = "Start Service";
-  
+
   void stopVoice() {
     _text = "";
     timer?.cancel();
@@ -190,16 +187,16 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   void startTimer() {
     confirm = 0;
     _text = "";
-    timer = Timer.periodic(const Duration(seconds: 1), (_) { 
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => seconds--);
-      if(seconds == 0) {
+      if (seconds == 0) {
         _listen();
         seconds = 3;
       }
       // print(seconds);
     });
   }
-  
+
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -228,39 +225,38 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   Future<void> emergenciaVoz() async {
     print("hola");
     Position position = await _determinePosition();
-    final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
+    final buttonemergency =
+        await eventService.addEvent(position, 1, "Evento externo, por voz");
     print(buttonemergency);
-    if(buttonemergency == 'ok') {
-      if(!mounted) return;
-      mensajeInfo(context, "Emergencia por voz", "Emergencia generada correctamente.");
+    if (buttonemergency == 'ok') {
+      if (!mounted) return;
+      mensajeInfo(
+          context, "Emergencia por voz", "Emergencia generada correctamente.");
     }
   }
 
   void _listen() async {
     bool available = await _speech.initialize(
         onStatus: (value) async => {
-          print("onStatusR: $value"),
-          print("confirm en $confirm"),
-          if((value == "done" && confirm == 2)) {
-            emergenciaVoz(),
-            print("Emergencia"),
-            confirm = 0
-          }
-        },
+              print("onStatusR: $value"),
+              print("confirm en $confirm"),
+              if ((value == "done" && confirm == 2))
+                {emergenciaVoz(), print("Emergencia"), confirm = 0}
+            },
         onError: (value) => print("onStatusERROR: $value"));
-    
-    if(available){
+
+    if (available) {
       _speech.listen(
         onResult: (value) => setState(() {
           _text = value.recognizedWords;
-          if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
-            confirm ++;   
-            print(confirm);    
+          if ((_text.contains("ayuda") || _text.contains("Ayuda"))) {
+            confirm++;
+            print(confirm);
             _text = "";
             timer?.cancel();
-             _speech.stop();
-             _prefs.button = false;
-             activacion.stopListening();
+            _speech.stop();
+            _prefs.button = false;
+            activacion.stopListening();
             setState(() {});
           }
         }),
@@ -293,21 +289,15 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               onChanged: (value) async {
                 _prefs.button = value;
                 if (value) {
-                  await FlutterBackground.enableBackgroundExecution();
                   activacion.startListening();
                   startTimer();
                 } else {
                   activacion.stopListening();
                   stopVoice();
-                  
-                  if (FlutterBackground.isBackgroundExecutionEnabled) {
-                    print("Si toy");
-                    await FlutterBackground.disableBackgroundExecution();
-                  }
                 }
                 setState(() {});
               }),
-              // onChanged: null),
+          // onChanged: null),
           const Text(
             "SI",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
@@ -319,7 +309,6 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
     );
   }
 }
-
 
 class TituloDrawer extends StatelessWidget {
   const TituloDrawer({
@@ -399,9 +388,7 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-
                   "Presiona en caso de emergencia",
-
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
