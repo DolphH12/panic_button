@@ -120,7 +120,6 @@ class MenuDrawer extends StatelessWidget {
                 const SizedBox(
                   height: 25,
                 ),
-      
                 ListTile(
                   title: const Text(
                     "Visualizador de eventos",
@@ -133,11 +132,9 @@ class MenuDrawer extends StatelessWidget {
                   leading: const Icon(Icons.map),
                   onTap: () => Navigator.pushNamed(context, 'selectMap'),
                 ),
-      
                 const SizedBox(
                   height: 25,
                 ),
-      
                 const SwicthBtnPanic(),
               ],
             ),
@@ -182,8 +179,12 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   int seconds = 3;
   // int confirm = 0;
   String text = "Start Service";
+<<<<<<< HEAD
   Confirm confirm = Confirm();
   
+=======
+
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
   void stopVoice() {
     _text = "";
     timer?.cancel();
@@ -194,18 +195,25 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   void startTimer() {
     confirm.counter = 0;
     _text = "";
-    timer = Timer.periodic(const Duration(seconds: 1), (_) { 
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() => seconds--);
-      if(seconds == 0) {
+      if (seconds == 0) {
         _listen();
         seconds = 3;
       }
     });
   }
+<<<<<<< HEAD
   
   // Future<Position> _determinePosition() async {
   //   bool serviceEnabled;
   //   LocationPermission permission;
+=======
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
 
   //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   //   if (!serviceEnabled) {
@@ -230,18 +238,26 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
 
   Future<void> emergenciaVoz() async {
     print("hola");
+<<<<<<< HEAD
     Position position = await determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
+=======
+    Position position = await _determinePosition();
+    final buttonemergency =
+        await eventService.addEvent(position, 1, "Evento externo, por voz");
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
     print(buttonemergency);
-    if(buttonemergency == 'ok') {
-      if(!mounted) return;
-      mensajeInfo(context, "Emergencia por voz", "Emergencia generada correctamente.");
+    if (buttonemergency == 'ok') {
+      if (!mounted) return;
+      mensajeInfo(
+          context, "Emergencia por voz", "Emergencia generada correctamente.");
     }
   }
 
   void _listen() async {
     bool available = await _speech.initialize(
         onStatus: (value) async => {
+<<<<<<< HEAD
           print("onStatusR: $value"),
           print("confirm en ${confirm.counter}"),
           if((value == "done" && confirm.counter == 2)) {
@@ -250,20 +266,33 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
             confirm.counter = 0
           }
         },
+=======
+              print("onStatusR: $value"),
+              print("confirm en $confirm"),
+              if ((value == "done" && confirm == 2))
+                {emergenciaVoz(), print("Emergencia"), confirm = 0}
+            },
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
         onError: (value) => print("onStatusERROR: $value"));
-    
-    if(available){
+
+    if (available) {
       _speech.listen(
         onResult: (value) => setState(() {
           _text = value.recognizedWords;
+<<<<<<< HEAD
           if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
             confirm.counter ++;   
             print(confirm.counter);    
+=======
+          if ((_text.contains("ayuda") || _text.contains("Ayuda"))) {
+            confirm++;
+            print(confirm);
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
             _text = "";
             timer?.cancel();
-             _speech.stop();
-             _prefs.button = false;
-             activacion.stopListening();
+            _speech.stop();
+            _prefs.button = false;
+            activacion.stopListening();
             setState(() {});
           }
         }),
@@ -296,23 +325,22 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               onChanged: (value) async {
                 _prefs.button = value;
                 if (value) {
+<<<<<<< HEAD
                   await FlutterBackground.enableBackgroundExecution();
                   activacion.startListening(_speech, timer);
+=======
+                  activacion.startListening();
+>>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
                   startTimer();
                   // if(!mounted) return;
                   // Navigator.pushReplacementNamed(context, 'home');
                 } else {
                   activacion.stopListening();
                   stopVoice();
-                  
-                  if (FlutterBackground.isBackgroundExecutionEnabled) {
-                    print("Si toy");
-                    await FlutterBackground.disableBackgroundExecution();
-                  }
                 }
                 setState(() {});
               }),
-              // onChanged: null),
+          // onChanged: null),
           const Text(
             "SI",
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
@@ -324,7 +352,6 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
     );
   }
 }
-
 
 class TituloDrawer extends StatelessWidget {
   const TituloDrawer({
@@ -404,9 +431,7 @@ class ButtonPanicWidget extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
                 child: Text(
-
                   "Presiona en caso de emergencia",
-
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
