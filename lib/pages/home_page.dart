@@ -8,6 +8,7 @@ import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../utils/confirm.dart';
 import '../utils/utils.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +19,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  
   final PreferenciasUsuario _prefs = PreferenciasUsuario();
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -177,8 +180,9 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   String _text = "";
   Timer? timer;
   int seconds = 3;
-  int confirm = 0;
+  // int confirm = 0;
   String text = "Start Service";
+  Confirm confirm = Confirm();
   
   void stopVoice() {
     _text = "";
@@ -188,7 +192,7 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   }
 
   void startTimer() {
-    confirm = 0;
+    confirm.counter = 0;
     _text = "";
     timer = Timer.periodic(const Duration(seconds: 1), (_) { 
       setState(() => seconds--);
@@ -196,38 +200,37 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
         _listen();
         seconds = 3;
       }
-      // print(seconds);
     });
   }
   
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  // Future<Position> _determinePosition() async {
+  //   bool serviceEnabled;
+  //   LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     return Future.error('Location services are disabled.');
+  //   }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       return Future.error('Location permissions are denied');
+  //     }
+  //   }
 
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
+  //   if (permission == LocationPermission.deniedForever) {
+  //     return Future.error(
+  //         'Location permissions are permanently denied, we cannot request permissions.');
+  //   }
 
-    return await Geolocator.getCurrentPosition();
-  }
+  //   return await Geolocator.getCurrentPosition();
+  // }
 
   Future<void> emergenciaVoz() async {
     print("hola");
-    Position position = await _determinePosition();
+    Position position = await determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
     print(buttonemergency);
     if(buttonemergency == 'ok') {
@@ -240,11 +243,11 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
     bool available = await _speech.initialize(
         onStatus: (value) async => {
           print("onStatusR: $value"),
-          print("confirm en $confirm"),
-          if((value == "done" && confirm == 2)) {
+          print("confirm en ${confirm.counter}"),
+          if((value == "done" && confirm.counter == 2)) {
             emergenciaVoz(),
             print("Emergencia"),
-            confirm = 0
+            confirm.counter = 0
           }
         },
         onError: (value) => print("onStatusERROR: $value"));
@@ -254,8 +257,8 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
         onResult: (value) => setState(() {
           _text = value.recognizedWords;
           if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
-            confirm ++;   
-            print(confirm);    
+            confirm.counter ++;   
+            print(confirm.counter);    
             _text = "";
             timer?.cancel();
              _speech.stop();
@@ -294,8 +297,10 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
                 _prefs.button = value;
                 if (value) {
                   await FlutterBackground.enableBackgroundExecution();
-                  activacion.startListening();
+                  activacion.startListening(_speech, timer);
                   startTimer();
+                  // if(!mounted) return;
+                  // Navigator.pushReplacementNamed(context, 'home');
                 } else {
                   activacion.stopListening();
                   stopVoice();

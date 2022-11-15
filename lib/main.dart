@@ -18,7 +18,7 @@ void main() async {
   await FlutterBackground.hasPermissions;
   await checkInternet();
   if(prefs.button == true){
-    activacion.startListening();
+    activacion.startListening(null, null);
   }
   runApp(const MyApp());
 }

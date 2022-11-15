@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:panic_app/main.dart';
-import 'package:panic_app/pages/home_page.dart';
 import 'package:panic_app/services/event_services.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class ActivacionBotton {
   
@@ -15,7 +16,7 @@ class ActivacionBotton {
 
   
   int counter = 0;
-  void startListening() {
+  void startListening(SpeechToText? spech, Timer? timer) {
     subscription = FlutterAndroidVolumeKeydown.stream.listen((event) {
       print("sirve");
       if (event == HardwareButton.volume_down) {
@@ -25,8 +26,14 @@ class ActivacionBotton {
           // envio la alerta
           _message();
           stopListening();
+          print(spech);
+          spech?.stop();
+          timer?.cancel();
           _prefs.button =  false;
           counter = 0;
+
+
+
         }
       } else if (event == HardwareButton.volume_up) {}
     });
@@ -37,59 +44,20 @@ class ActivacionBotton {
       
   }
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
-
   void _message() async{
-    Position position = await _determinePosition();
+    Position position = await determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, botones de volumen");
     if(buttonemergency =="ok"){
       print("enviado");
       var context  =  navigatorKey.currentContext;
       mensajeInfo(context!,  "Alerta de emergencia enviada!", "");
+      // Navigator.pushReplacementNamed(navigatorKey.currentContext!, 'home');
     }
-    
-    
   }
-
 }
 
 
-EventService eventService =  new EventService();
+EventService eventService = EventService();
 ActivacionBotton activacion = ActivacionBotton();
 
 
