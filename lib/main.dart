@@ -15,13 +15,9 @@ void main() async {
   final prefs = PreferenciasUsuario();
   await prefs.initPrefs();
   await checkInternet();
-<<<<<<< HEAD
   if(prefs.button == true){
     activacion.startListening(null, null);
-=======
-  if (prefs.button == true) {
-    activacion.startListening();
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
+
   }
   runApp(const MyApp());
 }

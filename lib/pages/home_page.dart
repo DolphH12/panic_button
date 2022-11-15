@@ -179,12 +179,9 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   int seconds = 3;
   // int confirm = 0;
   String text = "Start Service";
-<<<<<<< HEAD
   Confirm confirm = Confirm();
   
-=======
 
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
   void stopVoice() {
     _text = "";
     timer?.cancel();
@@ -203,49 +200,13 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
       }
     });
   }
-<<<<<<< HEAD
-  
-  // Future<Position> _determinePosition() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-=======
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
-
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     return Future.error('Location services are disabled.');
-  //   }
-
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       return Future.error('Location permissions are denied');
-  //     }
-  //   }
-
-  //   if (permission == LocationPermission.deniedForever) {
-  //     return Future.error(
-  //         'Location permissions are permanently denied, we cannot request permissions.');
-  //   }
-
-  //   return await Geolocator.getCurrentPosition();
-  // }
 
   Future<void> emergenciaVoz() async {
     print("hola");
-<<<<<<< HEAD
     Position position = await determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
-=======
-    Position position = await _determinePosition();
-    final buttonemergency =
-        await eventService.addEvent(position, 1, "Evento externo, por voz");
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
+
     print(buttonemergency);
     if (buttonemergency == 'ok') {
       if (!mounted) return;
@@ -257,7 +218,6 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   void _listen() async {
     bool available = await _speech.initialize(
         onStatus: (value) async => {
-<<<<<<< HEAD
           print("onStatusR: $value"),
           print("confirm en ${confirm.counter}"),
           if((value == "done" && confirm.counter == 2)) {
@@ -266,28 +226,16 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
             confirm.counter = 0
           }
         },
-=======
-              print("onStatusR: $value"),
-              print("confirm en $confirm"),
-              if ((value == "done" && confirm == 2))
-                {emergenciaVoz(), print("Emergencia"), confirm = 0}
-            },
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
         onError: (value) => print("onStatusERROR: $value"));
 
     if (available) {
       _speech.listen(
         onResult: (value) => setState(() {
           _text = value.recognizedWords;
-<<<<<<< HEAD
           if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
             confirm.counter ++;   
             print(confirm.counter);    
-=======
-          if ((_text.contains("ayuda") || _text.contains("Ayuda"))) {
-            confirm++;
-            print(confirm);
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
+
             _text = "";
             timer?.cancel();
             _speech.stop();
@@ -325,12 +273,8 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               onChanged: (value) async {
                 _prefs.button = value;
                 if (value) {
-<<<<<<< HEAD
                   await FlutterBackground.enableBackgroundExecution();
                   activacion.startListening(_speech, timer);
-=======
-                  activacion.startListening();
->>>>>>> 42da7c6ac6621db2a629268b996040a28c44242f
                   startTimer();
                   // if(!mounted) return;
                   // Navigator.pushReplacementNamed(context, 'home');
