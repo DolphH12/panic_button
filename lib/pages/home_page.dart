@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
@@ -7,9 +7,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/confirm.dart';
 import '../utils/utils.dart';
+import '../widgets/buttons_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,7 +21,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
   final PreferenciasUsuario _prefs = PreferenciasUsuario();
 
   @override
@@ -28,13 +29,6 @@ class _HomePageState extends State<HomePage> {
       onWillPop: exitApp,
       child: Scaffold(
         appBar: AppBar(
-          // title: Text(
-          //   "¡Bienvenidos!",
-          //   style: TextStyle(
-          //       fontSize: 25,
-          //       color: _prefs.colorButton,
-          //       fontWeight: FontWeight.w700),
-          // ),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -44,6 +38,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: const ButtonPanicWidget(),
         drawer: const MenuDrawer(),
+        floatingActionButton: const FloatingCall(),
       ),
     );
   }
@@ -180,7 +175,6 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   // int confirm = 0;
   String text = "Start Service";
   Confirm confirm = Confirm();
-  
 
   void stopVoice() {
     _text = "";
@@ -201,11 +195,11 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
     });
   }
 
-
   Future<void> emergenciaVoz() async {
     print("hola");
     Position position = await determinePosition();
-    final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, por voz");
+    final buttonemergency =
+        await eventService.addEvent(position, 1, "Evento externo, por voz");
 
     print(buttonemergency);
     if (buttonemergency == 'ok') {
@@ -218,23 +212,20 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   void _listen() async {
     bool available = await _speech.initialize(
         onStatus: (value) async => {
-          print("onStatusR: $value"),
-          print("confirm en ${confirm.counter}"),
-          if((value == "done" && confirm.counter == 2)) {
-            emergenciaVoz(),
-            print("Emergencia"),
-            confirm.counter = 0
-          }
-        },
+              print("onStatusR: $value"),
+              print("confirm en ${confirm.counter}"),
+              if ((value == "done" && confirm.counter == 2))
+                {emergenciaVoz(), print("Emergencia"), confirm.counter = 0}
+            },
         onError: (value) => print("onStatusERROR: $value"));
 
     if (available) {
       _speech.listen(
         onResult: (value) => setState(() {
           _text = value.recognizedWords;
-          if ((_text.contains("ayuda") || _text.contains("Ayuda"))){ 
-            confirm.counter ++;   
-            print(confirm.counter);    
+          if ((_text.contains("ayuda") || _text.contains("Ayuda"))) {
+            confirm.counter++;
+            print(confirm.counter);
 
             _text = "";
             timer?.cancel();
@@ -351,7 +342,7 @@ class ButtonPanicWidget extends StatelessWidget {
         width: double.infinity,
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 "Botón de pánico",
@@ -366,11 +357,8 @@ class ButtonPanicWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: prefs.colorButton.withOpacity(0.8),
-                    fontSize: 25,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 25,
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50),
@@ -379,48 +367,104 @@ class ButtonPanicWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.black54,
-                      fontSize: 20,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(
                 height: 50,
               ),
-              SizedBox(
-                height: 300,
-                width: 300,
-                child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, "selectEmergency");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 20,
-                      shadowColor: prefs.colorButton.withOpacity(0.8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                      padding: const EdgeInsets.all(0.0),
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              prefs.colorButton,
-                              prefs.colorButton.withOpacity(0.8)
-                            ],
-                            begin: Alignment.bottomRight,
-                            end: Alignment.topLeft,
-                          ),
-                          borderRadius: BorderRadius.circular(200)),
-                    )),
-              ),
-              const SizedBox(
-                height: 80,
-              )
+              const Expanded(child: SelectEmergencyWidget()),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class FloatingCall extends StatefulWidget {
+  const FloatingCall({super.key});
+
+  @override
+  State<FloatingCall> createState() => _FloatingCallState();
+}
+
+class _FloatingCallState extends State<FloatingCall>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+
+  static const List<IconData> icons = [
+    Icons.local_police,
+    Icons.notification_important
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor = Colors.white;
+    Color foregroundColor = prefs.colorButton;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(icons.length, (int index) {
+        Widget child = Container(
+          height: 60.0,
+          width: 50.0,
+          alignment: FractionalOffset.topCenter,
+          child: ScaleTransition(
+            scale: CurvedAnimation(
+              parent: _controller,
+              curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
+                  curve: Curves.easeOut),
+            ),
+            child: FloatingActionButton(
+              heroTag: null,
+              backgroundColor: backgroundColor,
+              child: Icon(icons[index], color: foregroundColor),
+              onPressed: () async {
+                if (index == 0) {
+                  final call = Uri.parse('tel:123');
+                  if (await canLaunchUrl(call)) {
+                    launchUrl(call);
+                  } else {
+                    throw 'Could not launch $call';
+                  }
+                } else {
+                  final call = Uri.parse('tel:119');
+                  if (await canLaunchUrl(call)) {
+                    launchUrl(call);
+                  } else {
+                    throw 'Could not launch $call';
+                  }
+                }
+              },
+            ),
+          ),
+        );
+        return child;
+      }).toList()
+        ..add(
+          FloatingActionButton(
+            backgroundColor: foregroundColor,
+            child: const Icon(Icons.call),
+            onPressed: () {
+              if (_controller.isDismissed) {
+                _controller.forward();
+              } else {
+                _controller.reverse();
+              }
+            },
+          ),
+        ),
     );
   }
 }

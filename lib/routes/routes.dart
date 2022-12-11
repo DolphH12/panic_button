@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:panic_app/pages/buttons_page.dart';
+import 'package:panic_app/widgets/buttons_page.dart';
 import 'package:panic_app/pages/configuration_page.dart';
 import 'package:panic_app/pages/contactos/add_contactos_page.dart';
 import 'package:panic_app/pages/contactos/ver_contactos_page.dart';
@@ -28,7 +28,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'intro': (_) => const IntroPage(),
   'presentation': (_) => const PresentationPage(),
   'personalize': (_) => const PersonalizePage(),
-  'selectEmergency': (_) => const ButtonsPage(),
   'information': (_) => const InformationPage(),
   'profile': (_) => const ProfilePage(),
   'contacts': (_) => SeeContactPage(),
@@ -39,7 +38,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'map1': (_) => const Visualizer1Page(),
   'detail1': (_) => const Detail1Page(),
   'map2': (_) => const Visualizer2Page(),
-  
+
   // 'proyectos': (_) => const ProyectosPage(),
   // 'info': (_) => const InformationPage(),
   // 'participate': (_) => const ParticipatePage(),

@@ -22,6 +22,7 @@ class UsuarioService {
     request.headers.addAll(headers);
 
     try {
+      print("PERRA");
       final http.StreamedResponse response = await request.send();
 
       final Map<String, dynamic> decodedResp =

@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 
 class SelectButtonWidget extends StatelessWidget {
   const SelectButtonWidget(
-      {super.key, required this.tipo, required this.color, required this.type});
+      {super.key,
+      required this.tipo,
+      required this.color,
+      required this.type,
+      required this.icon});
 
   final String tipo;
   final Color color;
   final int type;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +42,19 @@ class SelectButtonWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(15)),
           child: Container(
             alignment: Alignment.center,
-            child: Text(
-              tipo,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 17),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 40),
+                const SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  tipo,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 15),
+                ),
+              ],
             ),
           ),
         ),

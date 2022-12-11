@@ -19,18 +19,19 @@ class _SplashPageState extends State<SplashPage> {
     final prefs = PreferenciasUsuario();
     if (prefs.refreshToken.isNotEmpty) {
       final ok = access(prefs.refreshToken);
-      
-        Timer(const Duration(seconds: 5), () async {
-          if (await check()) {
-            if (await ok) {
-              if(!mounted) return;
-              Navigator.pushReplacementNamed(context, 'home');
-            } else {
-              Navigator.pushReplacementNamed(context, 'login');
-            }
+
+      Timer(const Duration(seconds: 5), () async {
+        if (await check()) {
+          if (await ok) {
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(context, 'home');
           } else {
-            Navigator.pushReplacementNamed(context, 'internet');
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(context, 'login');
           }
+        } else {
+          Navigator.pushReplacementNamed(context, 'internet');
+        }
       });
     } else {
       Timer(const Duration(seconds: 3),
