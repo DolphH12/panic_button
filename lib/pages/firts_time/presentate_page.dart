@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:panic_app/services/user_service.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/button_main_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
 
 import '../../utils/preferencias_app.dart';
 import '../../utils/utils.dart';
-import '../../widgets/btn_casual.dart';
+import '../../widgets/button_casual_widget.dart';
 
 class PresentationPage extends StatelessWidget {
   const PresentationPage({Key? key}) : super(key: key);
@@ -69,7 +69,7 @@ class _StepPresentationState extends State<StepPresentation> {
   Widget build(BuildContext context) {
     return Stepper(
         controlsBuilder: (context, details) {
-          return BtnPpal(textobutton: 'Continuar', onPressed: continued);
+          return ButtonMainWidget(textobutton: 'Continuar', onPressed: continued);
         },
         type: StepperType.vertical,
         physics: const ScrollPhysics(),
@@ -100,7 +100,7 @@ class _StepPresentationState extends State<StepPresentation> {
               title: const Text("Seleccionar color"),
               content: Column(
                 children: [
-                  BtnCasual(
+                  ButtonCasualWidget(
                       textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
@@ -114,7 +114,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                 availableColors: colors,
                               ),
                               actions: [
-                                BtnCasual(
+                                ButtonCasualWidget(
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();

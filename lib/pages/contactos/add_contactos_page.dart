@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:panic_app/models/contacts_model.dart';
 import 'package:panic_app/services/contact_service.dart';
 
-import '../../widgets/btn_ppal.dart';
+import '../../widgets/button_main_widget.dart';
 import '../../widgets/custom_input.dart';
 
 class AddContactPage extends StatefulWidget {
@@ -128,7 +128,7 @@ class __FormState extends State<_Form> {
           const SizedBox(
             height: 20,
           ),
-          BtnPpal(
+          ButtonMainWidget(
             textobutton: 'Registrar Contacto',
             onPressed: () {
               _onSubmit();

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:geolocator/geolocator.dart';
 
-import '../widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/widgets.dart';
 
 void mostrarAlerta(BuildContext context, String mensaje) {
   showDialog(
@@ -13,7 +14,7 @@ void mostrarAlerta(BuildContext context, String mensaje) {
           actions: [
             Container(
               margin: const EdgeInsets.only(right:50, left:50, bottom: 25),
-              child: BtnPpal(
+              child: ButtonMainWidget(
                   textobutton: "Cerrar",
                   onPressed: () => Navigator.pop(context, 'OK')),
             ),
@@ -28,7 +29,7 @@ void mensajeInfo(BuildContext context, String titulo, String mensaje) {
       builder: (context) {
         return AlertDialog(
           title: Text(titulo),
-          content: mensaje!="" ?Text(mensaje): null,
+          content: mensaje != "" ?Text(mensaje): null,
         );
       });
 }

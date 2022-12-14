@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
-import 'package:panic_app/widgets/btn_casual.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/button_casual_widget.dart';
+import 'package:panic_app/widgets/button_main_widget.dart';
 
 class PersonalizePage extends StatelessWidget {
   const PersonalizePage({Key? key}) : super(key: key);
@@ -61,7 +61,7 @@ class _StepPersonalizeState extends State<StepPersonalize> {
   Widget build(BuildContext context) {
     return Stepper(
         controlsBuilder: (context, details) {
-          return BtnPpal(textobutton: 'Continuar', onPressed: continued);
+          return ButtonMainWidget(textobutton: 'Continuar', onPressed: continued);
         },
         type: StepperType.vertical,
         physics: const ScrollPhysics(),
@@ -74,7 +74,7 @@ class _StepPersonalizeState extends State<StepPersonalize> {
               title: const Text("Seleccionar color"),
               content: Column(
                 children: [
-                  BtnCasual(
+                  ButtonCasualWidget(
                       textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
@@ -88,7 +88,7 @@ class _StepPersonalizeState extends State<StepPersonalize> {
                                 availableColors: colors,
                               ),
                               actions: [
-                                BtnCasual(
+                                ButtonCasualWidget(
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();

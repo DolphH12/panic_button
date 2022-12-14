@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/button_main_widget.dart';
 
 class IntroPage extends StatelessWidget {
   const IntroPage({Key? key}) : super(key: key);
@@ -52,7 +52,7 @@ class ContainIntro extends StatelessWidget {
           style: TextStyle(
               color: Colors.black54, fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        BtnPpal(
+        ButtonMainWidget(
             textobutton: "Siguiente",
             onPressed: () => Navigator.pushNamed(context, 'presentation'))
       ],

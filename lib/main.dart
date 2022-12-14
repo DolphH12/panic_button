@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
@@ -49,7 +47,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Botón pánico UdeA',
-      initialRoute: 'splash',
+      initialRoute: 'home',
       routes: appRoutes,
       navigatorKey: navigatorKey,
     );

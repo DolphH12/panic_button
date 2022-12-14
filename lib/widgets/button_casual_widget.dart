@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class BtnCasual extends StatelessWidget {
+class ButtonCasualWidget extends StatelessWidget {
   final String textobutton;
   final VoidCallback onPressed;
   final double width;
   final Color colorBtn;
 
-  const BtnCasual({
+  const ButtonCasualWidget({
     Key? key,
     required this.textobutton,
     required this.onPressed,

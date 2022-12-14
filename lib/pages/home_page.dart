@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_background/flutter_background.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:panic_app/services/background_service.dart';
-import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:panic_app/services/background_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 import '../utils/confirm.dart';
 import '../utils/utils.dart';
 import '../widgets/buttons_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,8 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final PreferenciasUsuario _prefs = PreferenciasUsuario();
-
+  
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

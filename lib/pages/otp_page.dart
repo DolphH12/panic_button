@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:numeric_keyboard/numeric_keyboard.dart';
 
 import '../utils/utils.dart';
-import '../widgets/btn_ppal.dart';
+import '../widgets/button_main_widget.dart';
 
 class OtpPage extends StatefulWidget {
   const OtpPage({Key? key}) : super(key: key);
@@ -107,7 +107,7 @@ class _OtpPageState extends State<OtpPage> {
                     margin: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     constraints: const BoxConstraints(maxWidth: 500),
-                    child: BtnPpal(
+                    child: ButtonMainWidget(
                       textobutton: "Confirma",
                       onPressed: () async {
                         final Map info =

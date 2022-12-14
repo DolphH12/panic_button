@@ -3,7 +3,7 @@ import 'package:panic_app/models/contacts_model.dart';
 import 'package:panic_app/models/user_general_model.dart';
 import 'package:panic_app/services/contact_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
-import 'package:panic_app/widgets/btn_casual.dart';
+import 'package:panic_app/widgets/button_casual_widget.dart';
 import 'package:panic_app/widgets/contact_widget.dart';
 import 'package:panic_app/widgets/message_card.dart';
 
@@ -33,7 +33,7 @@ class SeeContactPage extends StatelessWidget {
         ),
       ),
       body: const ContainContacts(),
-      floatingActionButton: BtnCasual(
+      floatingActionButton: ButtonCasualWidget(
           textobutton: "Añadir contactos",
           onPressed: () => Navigator.pushNamed(context, "add"),
           width: 200,

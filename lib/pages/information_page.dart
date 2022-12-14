@@ -7,8 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:panic_app/services/event_services.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
-import 'package:panic_app/widgets/btn_casual.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/button_casual_widget.dart';
+import 'package:panic_app/widgets/button_main_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record_mp3/record_mp3.dart';
@@ -120,7 +120,7 @@ class _StepPresentationState extends State<StepPresentation> {
 
     return Stepper(
         controlsBuilder: (context, details) {
-          return BtnPpal(textobutton: 'Continuar', onPressed: continued);
+          return ButtonMainWidget(textobutton: 'Continuar', onPressed: continued);
         },
         type: StepperType.vertical,
         physics: const ScrollPhysics(),
@@ -166,7 +166,7 @@ class _StepPresentationState extends State<StepPresentation> {
                   const SizedBox(
                     height: 20,
                   ),
-                  BtnCasual(
+                  ButtonCasualWidget(
                       textobutton: "Imagen",
                       onPressed: () => showDialog(
                             context: context,
@@ -175,7 +175,7 @@ class _StepPresentationState extends State<StepPresentation> {
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  BtnCasual(
+                                  ButtonCasualWidget(
                                       textobutton: "Cámara",
                                       onPressed: () {
                                         Navigator.of(context).pop();
@@ -185,7 +185,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                       colorBtn:
                                           Theme.of(context).primaryColorDark),
                                   const SizedBox(height: 15,),
-                                  BtnCasual(
+                                  ButtonCasualWidget(
                                       textobutton: "Galeria",
                                       onPressed: () {
                                         Navigator.of(context).pop();
@@ -197,7 +197,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                 ],
                               ),
                               actions: [
-                                BtnCasual(
+                                ButtonCasualWidget(
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();

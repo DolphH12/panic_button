@@ -3,7 +3,7 @@ import 'package:panic_app/services/user_service.dart';
 
 import '../models/user_general_model.dart';
 import '../utils/utils.dart';
-import '../widgets/btn_ppal.dart';
+import '../widgets/button_main_widget.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/labels.dart';
 import 'login_page.dart';
@@ -154,7 +154,7 @@ class __FormState extends State<_Form> {
             height: 20,
           ),
           inputTermyCond(),
-          BtnPpal(
+          ButtonMainWidget(
             textobutton: 'Registrarme',
             onPressed: () => _onSubmit(context),
           )
@@ -237,7 +237,7 @@ class __FormState extends State<_Form> {
       ),
       actions: <Widget>[
         Center(
-          child: BtnPpal(
+          child: ButtonMainWidget(
               textobutton: "Cerrar",
               onPressed: () => Navigator.pop(context, 'OK')),
         ),

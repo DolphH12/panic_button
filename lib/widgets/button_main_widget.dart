@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class BtnPpal extends StatelessWidget {
+class ButtonMainWidget extends StatelessWidget {
   final String textobutton;
   final VoidCallback onPressed;
 
-  const BtnPpal({
+  const ButtonMainWidget({
     Key? key,
     required this.textobutton,
     required this.onPressed,

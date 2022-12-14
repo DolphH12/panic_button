@@ -22,7 +22,7 @@ class UsuarioService {
     request.headers.addAll(headers);
 
     try {
-      print("PERRA");
+      
       final http.StreamedResponse response = await request.send();
 
       final Map<String, dynamic> decodedResp =
@@ -32,6 +32,7 @@ class UsuarioService {
       _prefs.username = usuario;
 
       if (response.statusCode == 200) {
+        print('hola');
         return {'ok': true, 'token': decodedResp['access_token']};
       } else {
         return {'ok': false, 'mensaje': decodedResp["error_description"]};

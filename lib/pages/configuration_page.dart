@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:panic_app/services/user_service.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
-import 'package:panic_app/widgets/custom_input.dart';
 
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+import 'package:panic_app/services/user_service.dart';
 import '../../utils/preferencias_app.dart';
-import '../../utils/utils.dart';
-import '../../widgets/btn_casual.dart';
+import '../utils/utils.dart';
+import 'package:panic_app/widgets/widgets.dart';
 
 class ConfigurationPage extends StatelessWidget {
   const ConfigurationPage({Key? key}) : super(key: key);
@@ -162,12 +161,12 @@ class _ConfigViewState extends State<ConfigView> {
                       placehoder: "Apellido",
                       textController: lastNameCtrl,
                       keyboardType: TextInputType.text),
-                  BtnPpal(textobutton: "Enviar", onPressed: continuedPerfil)
+                  ButtonMainWidget(textobutton: "Enviar", onPressed: continuedPerfil)
                 ],
               )
             : Column(
                 children: [
-                  BtnCasual(
+                  ButtonCasualWidget(
                       textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
@@ -181,7 +180,7 @@ class _ConfigViewState extends State<ConfigView> {
                                 availableColors: colors,
                               ),
                               actions: [
-                                BtnCasual(
+                                ButtonCasualWidget(
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();
