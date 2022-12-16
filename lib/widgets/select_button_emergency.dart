@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class SelectButtonWidget extends StatelessWidget {
@@ -11,7 +13,7 @@ class SelectButtonWidget extends StatelessWidget {
   final String tipo;
   final Color color;
   final int type;
-  final IconData icon;
+  final String icon;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +47,11 @@ class SelectButtonWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 40),
+                Image(
+                  image: MemoryImage(base64Decode(icon)),
+                  width: 50,
+                  fit: BoxFit.cover,
+                ),
                 const SizedBox(
                   height: 5,
                 ),
