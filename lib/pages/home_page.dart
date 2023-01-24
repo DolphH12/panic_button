@@ -262,18 +262,18 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               activeColor: _prefs.colorButton,
               value: _prefs.button,
               onChanged: (value) async {
-                _prefs.button = value;
-                if (value) {
-                  await FlutterBackground.enableBackgroundExecution();
-                  activacion.startListening(_speech, timer);
-                  startTimer();
-                  // if(!mounted) return;
-                  // Navigator.pushReplacementNamed(context, 'home');
-                } else {
-                  activacion.stopListening();
-                  stopVoice();
-                }
-                setState(() {});
+                //   _prefs.button = value;
+                //   if (value) {
+                //     await FlutterBackground.enableBackgroundExecution();
+                //     activacion.startListening(_speech, timer);
+                //     startTimer();
+                //     // if(!mounted) return;
+                //     // Navigator.pushReplacementNamed(context, 'home');
+                //   } else {
+                //     activacion.stopListening();
+                //     stopVoice();
+                //   }
+                //   setState(() {});
               }),
           // onChanged: null),
           const Text(

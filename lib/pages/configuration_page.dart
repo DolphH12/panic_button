@@ -72,7 +72,7 @@ class _ContainConfigurationState extends State<ContainConfiguration> {
             height: 20,
           ),
           Configs(
-            title: "Batón",
+            title: "Color App",
             subtitle: "Cambia el color",
             icon: Icons.radio_button_checked,
             onPressed: () {
@@ -246,6 +246,5 @@ class _ConfigViewState extends State<ConfigView> {
     mensajeInfo(context, "Cambio realizado", "");
     Future.delayed(const Duration(seconds: 1),
         (() => Navigator.pushReplacementNamed(context, 'home')));
-
   }
 }

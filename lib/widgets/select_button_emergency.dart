@@ -21,7 +21,7 @@ class SelectButtonWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "information", arguments: type);
+          Navigator.pushNamed(context, "information", arguments: [type, tipo]);
         },
         style: ElevatedButton.styleFrom(
           elevation: 10,

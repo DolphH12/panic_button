@@ -13,18 +13,6 @@ class SelectEmergencyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<ListEventModel> events = [];
-    List<String> labels = [
-      "Robo a personas",
-      "Accidente",
-      "Acoso",
-      "Violencia intrafamiliar",
-      "Violencia de genero",
-      "Extorsion",
-      "Desastre",
-      "Secuestro",
-      "Homicidio",
-      "Otro",
-    ];
     EventService eventService = EventService();
     PreferenciasUsuario prefs = PreferenciasUsuario();
 

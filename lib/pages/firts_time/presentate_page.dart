@@ -97,7 +97,7 @@ class _StepPresentationState extends State<StepPresentation> {
               isActive: currentStep > 0,
               state: currentStep > 0 ? StepState.complete : StepState.disabled),
           Step(
-              title: const Text("Seleccionar color"),
+              title: const Text("Seleccionar color para tu app"),
               content: Column(
                 children: [
                   BtnCasual(
