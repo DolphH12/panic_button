@@ -20,7 +20,7 @@ class Visualizer2Page extends StatefulWidget {
 class _MainScreenState extends State<Visualizer2Page> {
   final eventService = EventService();
 
-  bool showZones = true;
+  bool showZones = false;
   bool showEvents = true;
   bool showDateFilter = true;
   bool typeOfMap = true;
