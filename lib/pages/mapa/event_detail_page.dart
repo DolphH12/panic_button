@@ -8,7 +8,6 @@ import 'package:syncfusion_flutter_maps/maps.dart';
 
 import '../../models/map_event_model.dart';
 import '../../services/event_services.dart';
-import '../../widgets/audio_widget.dart';
 
 class EventDetailPage extends StatefulWidget {
   final MapEvent eventData;
@@ -51,13 +50,18 @@ class _EventDetailPageState extends State<EventDetailPage> {
         latitude: widget.eventData.latitude,
         longitude: widget.eventData.longitude,
         description: widget.eventData.description,
-        comment: widget.eventData.comment));
+        comment: widget.eventData.comment, 
+        direction: widget.eventData.direction, 
+        kind: widget.eventData.kind, 
+        phone: widget.eventData.phone, 
+        icon: widget.eventData.icon        
+        ));
 
     _zoomPanBehavior = MapZoomPanBehavior(
         enablePanning: false,
-        zoomLevel: 13,
+        zoomLevel: 17,
         minZoomLevel: 10,
-        maxZoomLevel: 15,
+        maxZoomLevel: 20,
         focalLatLng:
             MapLatLng(widget.eventData.latitude, widget.eventData.longitude),
         enableDoubleTapZooming: true,
@@ -148,7 +152,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   color: CupertinoColors.activeBlue,
                 ),
                 onPressed: () {
-                  print('Playing');
                 })
           ],
         ),
@@ -214,120 +217,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ),
           ),
           SizedBox(height: gap),
-          propDetail(title: 'Archivos adjuntos:'),
-          Container(
-            margin: const EdgeInsets.only(top: 16),
-            child: Column(
-              children: [
-                FutureBuilder(
-                future: eventService.eventMedia(widget.eventData.id),
-                builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-                  if (snapshot.hasData) {
-                    final data = snapshot.data!;
-                    final fotos = data['photos'];
-                    final audios = data['audios'];
-                    if(!fotos.isEmpty && !audios.isEmpty){
-                      return SafeArea(
-                        child: Column(
-                          children: [
-                            _showPhotos(fotos, context),
-
-                              const SizedBox(height: 12,),
-
-                              Card(
-                                child: Column(
-                                  children: [
-                                    const SizedBox(height: 10,),
-
-                                    const Text(
-                                      "Audio de lo ocurrido",
-                                      style: TextStyle(
-                                        fontSize: 17
-                                      ),
-
-                                    ),
-                                    const SizedBox(height: 8),
-
-                                    AudioWidget(audios: audios),
-
-                                    const SizedBox(height: 10,),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 30),
-                          ],
-                        ),
-                      );
-                    }else if (!fotos.isEmpty && audios.isEmpty){
-                      return Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: _showPhotos(fotos, context)
-                          ),
-
-                          const SizedBox(height: 30,),
-                        ]
-                      );
-                    } else if (fotos.isEmpty && !audios.isEmpty){
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12,),
-                              Card(
-                                child: Column(
-                                  children: [
-                                    const SizedBox(height: 10,),
-                                    const Text(
-                                      "Audio de lo ocurrido",
-                                      style: TextStyle(
-                                        fontSize: 17
-                                      ),
-
-                                    ),
-                                    const SizedBox(height: 8,),
-                                    AudioWidget(audios: audios),
-                                    const SizedBox(height: 10,),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 30,),
-                        ],
-                      );
-                    } else {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            "No hay archivos multimedia disponibles",
-                            style: TextStyle(
-                              color: Colors.black38,
-                            ),
-                          )
-                        ],
-                      );
-                    }
-                  } else {
-                    return Container(
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            color: Theme.of(context).primaryColorDark,
-                          ),
-
-                          const SizedBox(height: 15),
-
-                          const Text("Cargando evidencias...")
-                        ],
-                      ),
-                    );
-                  }
-                }
-              )
-              ],
-            ),
-          ),
         ],
       ),
     );
