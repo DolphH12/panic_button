@@ -54,7 +54,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
         direction: widget.eventData.direction, 
         kind: widget.eventData.kind, 
         phone: widget.eventData.phone, 
-        icon: widget.eventData.icon        
+        icon: widget.eventData.icon,
+        type: widget.eventData.type      
         ));
 
     _zoomPanBehavior = MapZoomPanBehavior(
@@ -165,6 +166,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          propDetail(title: 'Tipo de evento:', content: '${widget.eventData.type}'),
+          SizedBox(height: gap),
           propDetail(
               title: 'Fecha:',
               content: '${widget.eventData.date} ${widget.eventData.time}'),

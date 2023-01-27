@@ -4,7 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
+import 'package:panic_app/utils/utils.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/map_event_model.dart';
 import '../../models/map_zone_model.dart';
@@ -173,7 +176,8 @@ class _MainScreenState extends State<VisualizerPage> {
           direction: '', 
           kind: 0, 
           phone: '', 
-          icon: '' 
+          icon: '',
+          type: event['typeEmergency']
           ));
           _mapEvents.add(MapEvent(
           id: event['id'],
@@ -188,7 +192,8 @@ class _MainScreenState extends State<VisualizerPage> {
           direction: '', 
           kind: 0, 
           phone: '', 
-          icon: ''
+          icon: '',
+          type: 12
           ));
     } 
     print("cargando eventos");  
@@ -229,7 +234,8 @@ class _MainScreenState extends State<VisualizerPage> {
       status: 0, 
       time: '', 
       zoneCode: 100, 
-      icon: emergency['image']
+      icon: emergency['image'],
+      type: 1
       )); 
       desplazar = desplazar + 0.01;    
     }
@@ -528,22 +534,26 @@ class _MainScreenState extends State<VisualizerPage> {
                                         getImage64(_filteredEvents[index].icon,index,100),
                                         const SizedBox(height: 20),
                                         propDetail(title: 'Nombre :  ',content: _filteredEvents[index].id),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: 22),
                                         propDetail(title: 'Descripción :  ', content: _filteredEvents[index].description),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: 22),
                                         propDetail(title: 'Ubicación :  ', content: _filteredEvents[index].direction),
-                                        const SizedBox(height: 10),
-                                        propDetail(title: 'Telefono :  ' , content: _filteredEvents[index].phone),
-                                        const SizedBox(height: 10),
-
+                                        const SizedBox(height: 7),
+                                        Row(
+                                          children: [
+                                            propDetail(title: 'Telefono :  ' , content: _filteredEvents[index].phone),
+                                            const SizedBox(width: 20,),
+                                            const FloatingCall(),
+                                          ],
+                                        ),
                                       ],
                                     ),
-                                    actions: [
-                                       ElevatedButton(onPressed: (){
-                                          Navigator.pop(context);
-                                          }, 
-                                          child: const Text('Cerrar')
-                                          ),                                        
+                                    actions: [                                      
+                                              ElevatedButton(onPressed: (){
+                                              Navigator.pop(context);
+                                              }, 
+                                              child: const Text('Cerrar')
+                                              ),                                           
                                       ]                                  
                                     );
                                   }
@@ -844,6 +854,66 @@ class _MainScreenState extends State<VisualizerPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class FloatingCall extends StatefulWidget {
+  const FloatingCall({super.key});
+
+  @override
+  State<FloatingCall> createState() => _FloatingCallState();
+}
+
+class _FloatingCallState extends State<FloatingCall>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+
+  static const List<IconData> icons = [
+    Icons.local_police,
+    Icons.notification_important
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor = Colors.white;
+    Color foregroundColor = prefs.colorButton;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 60,
+          width: 50,
+          alignment: FractionalOffset.topCenter,
+          child: FloatingActionButton(
+              heroTag: null,
+              backgroundColor: backgroundColor,
+              child: Icon(Icons.call, color: foregroundColor),
+              onPressed: () async {
+                
+                  final call = Uri.parse('tel:${112}');
+                  if (await canLaunchUrl(call)) {
+                    launchUrl(call);
+                  } else {
+                    throw 'Could not launch $call';
+                  }
+                
+              },
+            ),
+          
+        )
+      ]
+    
     );
   }
 }

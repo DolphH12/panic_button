@@ -12,6 +12,7 @@ class MapEvent {
   final String direction;
   final int kind;
   final String icon;
+  final int type;
 
 
   const MapEvent(
@@ -27,7 +28,8 @@ class MapEvent {
       required this.phone,
       required this.direction,
       required this.kind,
-      required this.icon
+      required this.icon,
+      required this.type
       });
       
 
