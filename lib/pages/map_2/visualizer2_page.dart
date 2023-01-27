@@ -23,7 +23,7 @@ class _MainScreenState extends State<Visualizer2Page> {
   bool showZones = false;
   bool showEvents = true;
   bool showDateFilter = true;
-  bool typeOfMap = true;
+  bool typeOfMap = false;
   DateTimeRange filterDateRange = DateTimeRange(
     start: DateTime(2022, 1, 1),
     end: DateTime(2022, 12, 31),
