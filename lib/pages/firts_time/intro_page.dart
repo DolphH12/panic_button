@@ -26,7 +26,7 @@ class ContainIntro extends StatelessWidget {
         Column(
           children: [
             Text(
-              "Boton de Panico",
+              "Botón de pánico",
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -34,7 +34,7 @@ class ContainIntro extends StatelessWidget {
                   fontWeight: FontWeight.bold),
             ),
             Text(
-              "Nuestra App le da una calurosa bienvenida!",
+              "¡Nuestra App le da una calurosa bienvenida!",
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Theme.of(context).primaryColorDark,

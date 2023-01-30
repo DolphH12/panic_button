@@ -6,6 +6,7 @@ import '../utils/utils.dart';
 import '../widgets/btn_ppal.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/labels.dart';
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -30,23 +31,53 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 _tituloPage(),
                 const _Form(),
-                const Labels(
-                    ruta: 'login',
-                    label1: '¿Ya tienes una cuenta?',
-                    label2: '¡Inicia Sesión!'),
+                _labelRegister()
               ],
             ),
           ),
         ));
   }
 
+  Widget _labelRegister() {
+      return Column(
+        children: [
+          const Text(
+            "¿Ya tienes una cuenta?",
+            style: TextStyle(
+                color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w300),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute<void>(
+              builder: (BuildContext context){
+                return const LoginPage();
+                },
+              ),  (Route<dynamic> route) => false,
+            );
+            },
+            child: Text(
+              "Inicia sesión",
+              style: TextStyle(
+                  color: Theme.of(context).primaryColorDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      );
+    }
+
   Widget _tituloPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 10,),
         Text(
-          'Boton de Panico',
+          'Botón de pánico',
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Theme.of(context).primaryColor,
@@ -85,8 +116,8 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 40),
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 35),
       child: Column(
         children: [
           CustomInput(
@@ -152,7 +183,7 @@ class __FormState extends State<_Form> {
           mostrarAlerta(context, info['mensaje']);
         }
       } else {
-        mostrarAlerta(context, "Recuerde aceptar los terminos y condiciones.");
+        mostrarAlerta(context, "Recuerde aceptar los términos y condiciones.");
       }
     } else {
       mostrarAlerta(context, "Las contraseñas no coinciden");
@@ -180,7 +211,7 @@ class __FormState extends State<_Form> {
                 builder: (BuildContext context) => _termsyconds());
           },
           child: const Text(
-            ' Terminos y condiciones*',
+            'Términos y condiciones*',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
           ),
         )
@@ -192,7 +223,7 @@ class __FormState extends State<_Form> {
     return AlertDialog(
       scrollable: true,
       title: const Text(
-        "Terminos y condiciones",
+        "Términos y condiciones",
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -200,7 +231,7 @@ class __FormState extends State<_Form> {
         textAlign: TextAlign.center,
       ),
       content: const Text(
-        "Terminos y Condiciones",
+        "Contenido para términos y Condiciones",
         style: TextStyle(fontSize: 10),
         textAlign: TextAlign.center,
       ),

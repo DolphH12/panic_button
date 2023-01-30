@@ -26,6 +26,23 @@ class PreferenciasUsuario {
     _prefs = await SharedPreferences.getInstance();
   }
 
+ String get name {
+    return _prefs.getString('name') ?? '';
+  }
+
+  set name(String value) {
+    _prefs.setString('name', value);
+  }
+
+  String get lastName {
+    return _prefs.getString('lastName') ?? '';
+  }
+
+  set lastName(String value) {
+    _prefs.setString('lastName', value);
+  }
+
+
   // TOKEN
   String get token {
     return _prefs.getString('token') ?? '';
@@ -33,6 +50,14 @@ class PreferenciasUsuario {
 
   set token(String value) {
     _prefs.setString('token', value);
+  }
+
+  String get refreshToken {
+    return _prefs.getString('refreshToken') ?? '';
+  }
+
+  set refreshToken(String value) {
+    _prefs.setString('refreshToken', value);
   }
 
   // USERNAME
@@ -75,5 +100,13 @@ class PreferenciasUsuario {
 
   set colorButton(Color color) {
     _prefs.setInt('colorButton', color.value);
+  }
+
+  bool get permissionDeniedCamera {
+    return _prefs.getBool('permissionInitial') ?? false;
+  }
+
+  set permissionDeniedCamera(bool value) {
+    _prefs.setBool('permissionInitial', value);
   }
 }

@@ -22,11 +22,13 @@ class UsuarioService {
     request.headers.addAll(headers);
 
     try {
+      print("PERRA");
       final http.StreamedResponse response = await request.send();
 
       final Map<String, dynamic> decodedResp =
           json.decode(await response.stream.bytesToString());
       _prefs.token = decodedResp['access_token'];
+      _prefs.refreshToken = decodedResp['refresh_token'];
       _prefs.username = usuario;
 
       if (response.statusCode == 200) {
@@ -36,6 +38,37 @@ class UsuarioService {
       }
     } catch (e) {
       return {'ok': false, 'mensaje': "Bad credentials"};
+    }
+  }
+
+  Future<bool> loginToRefresh(String refreshToken) async {
+    var headers = {
+      'Authorization': 'Basic Zmx1dHRlci1yZXRvOnVkZWE=',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    final request = http.Request(
+        'POST', Uri.parse('http://$ip/reto/autenticacion/oauth/token'));
+    request.bodyFields = {
+      'grant_type': 'refresh_token',
+      'refresh_token': refreshToken
+    };
+    request.headers.addAll(headers);
+
+    try {
+      final http.StreamedResponse response = await request.send();
+
+      final Map<String, dynamic> decodedResp =
+          json.decode(await response.stream.bytesToString());
+      _prefs.token = decodedResp['access_token'];
+      _prefs.refreshToken = decodedResp['refresh_token'];
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
 

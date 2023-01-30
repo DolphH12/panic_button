@@ -1,30 +1,67 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_android_volume_keydown/flutter_android_volume_keydown.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:panic_app/main.dart';
+import 'package:panic_app/services/event_services.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
+import 'package:panic_app/utils/utils.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class ActivacionBotton {
+  
+  final PreferenciasUsuario _prefs = PreferenciasUsuario();
   late StreamSubscription<HardwareButton> subscription;
-  int counter = 0;
 
-  void startListening() {
+  
+  int counter = 0;
+  void startListening(SpeechToText? spech, Timer? timer) {
     subscription = FlutterAndroidVolumeKeydown.stream.listen((event) {
+      print("sirve");
       if (event == HardwareButton.volume_down) {
         counter++;
         print(counter);
         if (counter == 3) {
-          print("ACTIVADO BEBE");
+          // envio la alerta
+          _message();
+          stopListening();
+          print(spech);
+          spech?.stop();
+          timer?.cancel();
+          _prefs.button =  false;
           counter = 0;
+
+
+
         }
       } else if (event == HardwareButton.volume_up) {}
     });
   }
 
   void stopListening() {
-    subscription.cancel();
+      subscription.cancel();
+      
+  }
+
+  void _message() async{
+    Position position = await determinePosition();
+    final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, botones de volumen");
+    if(buttonemergency =="ok"){
+      print("enviado");
+      var context  =  navigatorKey.currentContext;
+      mensajeInfo(context!,  "Alerta de emergencia enviada!", "");
+      // Navigator.pushReplacementNamed(navigatorKey.currentContext!, 'home');
+    }
   }
 }
 
+
+EventService eventService = EventService();
 ActivacionBotton activacion = ActivacionBotton();
+
+
+
 
 // import 'dart:async';
 // import 'dart:ui';

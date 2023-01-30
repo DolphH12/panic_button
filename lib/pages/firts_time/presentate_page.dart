@@ -97,11 +97,11 @@ class _StepPresentationState extends State<StepPresentation> {
               isActive: currentStep > 0,
               state: currentStep > 0 ? StepState.complete : StepState.disabled),
           Step(
-              title: const Text("Seleccionar Color"),
+              title: const Text("Seleccionar color para tu app"),
               content: Column(
                 children: [
                   BtnCasual(
-                      textobutton: 'Selecciona Color',
+                      textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -164,10 +164,11 @@ class _StepPresentationState extends State<StepPresentation> {
       if (!mounted) {}
       state == 'ok'
           ? setState(() => currentStep += 1)
-          : mostrarAlerta(context, "Fallo algo en la actualizacion.");
+          : mostrarAlerta(context, "Falló algo en la actualización.");
       // setState(() => currentStep += 1);
     } else if (currentStep == 1) {
       prefs.colorButton = pickerColor;
+      prefs.firstTime = true;
       Future.delayed(const Duration(seconds: 2),
           (() => Navigator.pushReplacementNamed(context, 'home')));
       mensajeInfo(context, "¡Felicidades!", "Personalización completa");

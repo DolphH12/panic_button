@@ -4,14 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:panic_app/routes/routes.dart';
+import 'package:panic_app/services/background_service.dart';
+import 'package:panic_app/services/internet_service.dart';
 import 'utils/preferencias_app.dart';
+import 'package:camera/camera.dart';
+import 'package:panic_app/pages/camera_page.dart';
 
-void main() async {
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = PreferenciasUsuario();
-  await prefs.initPrefs();
-  await FlutterBackground.initialize(androidConfig: androidConfig);
-  await FlutterBackground.hasPermissions;
+  await prefs.initPrefs();  
+  await checkInternet();
+  cameras = await availableCameras();
+  if (prefs.button == true) {
+    activacion.startListening(null, null);
+  }
   runApp(const MyApp());
 }
 
@@ -21,7 +30,7 @@ const androidConfig = FlutterBackgroundAndroidConfig(
       "Background notification for keeping the example app running in the background",
   notificationImportance: AndroidNotificationImportance.Default,
   notificationIcon: AndroidResource(
-      name: 'background_icon',
+      name: 'background_icon',  
       defType: 'drawable'), // Default is ic_launcher from folder mipmap
 );
 
@@ -41,52 +50,10 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Boton Panico UdeA',
+      title: 'Botón pánico UdeA',
       initialRoute: 'splash',
       routes: appRoutes,
+      navigatorKey: navigatorKey,
     );
   }
 }
-
-// class MyApp extends StatefulWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   State<MyApp> createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   StreamSubscription<HardwareButton>? subscription;
-
-//   String prueba = "";
-//   int ayuda2 = 0;
-//   int ayuda3 = 0;
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: const Text('Plugin example app'),
-//         ),
-//         body: Center(
-//           child: Column(
-//             children: [
-//               Text("prueba $prueba"),
-//               ElevatedButton(
-//                   onPressed: startListening,
-//                   child: const Text("Start listening")),
-//               ElevatedButton(
-//                   onPressed: stopListening,
-//                   child: const Text("Stop listening")),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

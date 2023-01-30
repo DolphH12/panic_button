@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:panic_app/models/contacts_model.dart';
 import 'package:panic_app/models/user_general_model.dart';
 import 'package:panic_app/services/contact_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/widgets/btn_casual.dart';
 import 'package:panic_app/widgets/contact_widget.dart';
 import 'package:panic_app/widgets/message_card.dart';
 
 class SeeContactPage extends StatelessWidget {
-  const SeeContactPage({Key? key}) : super(key: key);
+  SeeContactPage({Key? key}) : super(key: key);
 
+  final PreferenciasUsuario prefs = PreferenciasUsuario();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,9 +34,9 @@ class SeeContactPage extends StatelessWidget {
       ),
       body: const ContainContacts(),
       floatingActionButton: BtnCasual(
-          textobutton: "Añadir",
+          textobutton: "Añadir contactos",
           onPressed: () => Navigator.pushNamed(context, "add"),
-          width: 100,
+          width: 200,
           colorBtn: Theme.of(context).primaryColorDark),
     );
   }
@@ -51,6 +53,9 @@ class ContainContacts extends StatefulWidget {
 
 class _ContainContactsState extends State<ContainContacts> {
   ContactService contactService = ContactService();
+
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+
   List<ContactModel> contacts = [];
   @override
   Widget build(BuildContext context) {
@@ -62,7 +67,7 @@ class _ContainContactsState extends State<ContainContacts> {
             "Contactos",
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).primaryColorDark,
                 fontSize: 30,
                 fontWeight: FontWeight.bold),
           ),
@@ -76,9 +81,9 @@ class _ContainContactsState extends State<ContainContacts> {
                 if (snapshot.data!.isEmpty) {
                   return const Center(
                     child: MessageCardWidget(
-                        title: "¡Lo Sentimos!",
+                        title: "Aún no tienes contactos de emergencia.",
                         message:
-                            "Aun no tienes contactos, por favor agregalos."),
+                            'Agrégalos en "Añadir contactos"'),
                   );
                 } else {
                   for (var map in snapshot.data!) {
@@ -106,7 +111,7 @@ class _ContainContactsState extends State<ContainContacts> {
           ),
           //const ImageAvatar(),
           const SizedBox(
-            height: 15,
+            height: 20,
           ),
           //const CamposPerfilWidget()
         ],
@@ -130,8 +135,9 @@ class ImageAvatar extends StatelessWidget {
               color: Theme.of(context).primaryColorDark,
               borderRadius: BorderRadius.circular(100)),
         ),
+        
         const CircleAvatar(
-          backgroundImage: AssetImage("assets/alert.png"),
+          backgroundImage: AssetImage("assets/usuario.png"),
           radius: 65,
           backgroundColor: Colors.white,
         ),

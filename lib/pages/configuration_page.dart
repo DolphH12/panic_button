@@ -36,46 +36,105 @@ class ConfigurationPage extends StatelessWidget {
         padding: EdgeInsets.all(15.0),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30.0),
-          child: ContainPresentation(),
+          child: ContainConfiguration(),
         ),
       ),
     );
   }
 }
 
-class ContainPresentation extends StatelessWidget {
-  const ContainPresentation({super.key});
+class ContainConfiguration extends StatefulWidget {
+  const ContainConfiguration({super.key});
+
+  @override
+  State<ContainConfiguration> createState() => _ContainConfigurationState();
+}
+
+class _ContainConfigurationState extends State<ContainConfiguration> {
+  int type = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Configura tu app",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
-        ),
-        const Expanded(child: StepPresentation())
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Configs(
+            title: "Perfil",
+            subtitle: "Cambia tu nombre",
+            icon: Icons.person_pin_rounded,
+            onPressed: () {
+              setState(() {
+                type = 1;
+              });
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Configs(
+            title: "Color App",
+            subtitle: "Cambia el color",
+            icon: Icons.radio_button_checked,
+            onPressed: () {
+              setState(() {
+                type = 2;
+              });
+            },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          ConfigView(type: type)
+        ],
+      ),
     );
   }
 }
 
-class StepPresentation extends StatefulWidget {
-  const StepPresentation({
-    Key? key,
-  }) : super(key: key);
+class Configs extends StatelessWidget {
+  const Configs(
+      {super.key,
+      required this.title,
+      required this.subtitle,
+      required this.icon,
+      required this.onPressed});
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onPressed;
 
   @override
-  State<StepPresentation> createState() => _StepPresentationState();
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+        leading: Icon(icon),
+        onTap: onPressed,
+      ),
+    );
+  }
 }
 
-class _StepPresentationState extends State<StepPresentation> {
-  int currentStep = 0;
+class ConfigView extends StatefulWidget {
+  const ConfigView({super.key, required this.type});
+
+  final int type;
+
+  @override
+  State<ConfigView> createState() => _ConfigViewState();
+}
+
+class _ConfigViewState extends State<ConfigView> {
   TextEditingController nameCtrl = TextEditingController();
   TextEditingController lastNameCtrl = TextEditingController();
   UsuarioService usuarioService = UsuarioService();
@@ -88,20 +147,10 @@ class _StepPresentationState extends State<StepPresentation> {
     if (pickerColor == Colors.transparent) {
       pickerColor = prefs.colorButton;
     }
-    return Stepper(
-        controlsBuilder: (context, details) {
-          return BtnPpal(textobutton: 'Continuar', onPressed: continued);
-        },
-        type: StepperType.vertical,
-        physics: const ScrollPhysics(),
-        currentStep: currentStep,
-        onStepTapped: (value) => tapped(value),
-        onStepContinue: () => continued,
-        onStepCancel: () => cancel,
-        steps: [
-          Step(
-              title: const Text("Datos iniciales"),
-              content: Column(
+    return widget.type == 0
+        ? const SizedBox()
+        : widget.type == 1
+            ? Column(
                 children: [
                   CustomInput(
                       icon: Icons.person_pin,
@@ -113,16 +162,13 @@ class _StepPresentationState extends State<StepPresentation> {
                       placehoder: "Apellido",
                       textController: lastNameCtrl,
                       keyboardType: TextInputType.text),
+                  BtnPpal(textobutton: "Enviar", onPressed: continuedPerfil)
                 ],
-              ),
-              isActive: currentStep > 0,
-              state: currentStep > 0 ? StepState.complete : StepState.disabled),
-          Step(
-              title: const Text("Seleccionar Color"),
-              content: Column(
+              )
+            : Column(
                 children: [
                   BtnCasual(
-                      textobutton: 'Selecciona Color',
+                      textobutton: 'Selecciona color',
                       onPressed: () => showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -139,6 +185,7 @@ class _StepPresentationState extends State<StepPresentation> {
                                     textobutton: 'Aceptar',
                                     onPressed: () {
                                       Navigator.of(context).pop();
+                                      continuedColor();
                                     },
                                     width: 100,
                                     colorBtn: Theme.of(context).primaryColor)
@@ -166,46 +213,38 @@ class _StepPresentationState extends State<StepPresentation> {
                   const SizedBox(
                     height: 20,
                   ),
+                  //BtnPpal(textobutton: "Cambiar", onPressed: continuedColor)
                 ],
-              ),
-              isActive: currentStep > 0,
-              state: currentStep > 0 ? StepState.complete : StepState.disabled),
-        ]);
+              );
   }
 
-  tapped(int value) {
-    setState(() {
-      currentStep = value;
-    });
-  }
-
-  continued() async {
-    if (currentStep == 0) {
-      if (nameCtrl.text.isNotEmpty && lastNameCtrl.text.isNotEmpty) {
-        state =
-            await usuarioService.updateUser(nameCtrl.text, lastNameCtrl.text);
-        if (!mounted) {}
-        state == 'ok'
-            ? setState(() => currentStep += 1)
-            : mostrarAlerta(context, "Fallo algo en la actualizacion.");
-      } else if (nameCtrl.text.isNotEmpty && lastNameCtrl.text.isEmpty ||
-          nameCtrl.text.isEmpty && lastNameCtrl.text.isNotEmpty) {
-        mensajeInfo(context, "Algo anda mal",
-            "Por favor llena los dos datos o ninguno");
+  continuedPerfil() async {
+    if (nameCtrl.text.isNotEmpty && lastNameCtrl.text.isNotEmpty) {
+      state = await usuarioService.updateUser(nameCtrl.text, lastNameCtrl.text);
+      if (!mounted) {}
+      Future.delayed(
+        const Duration(seconds: 2),
+        () => Navigator.pushReplacementNamed(context, 'home'),
+      );
+      if (state == 'ok') {
+        mensajeInfo(context, "Completado", "Actualización Exitosa.");
       } else {
-        setState(() => currentStep += 1);
+        mensajeInfo(context, "Error",
+            "Falló algo en la actualización. Intentalo luego");
       }
-
-      // setState(() => currentStep += 1);
-    } else if (currentStep == 1) {
-      prefs.colorButton = pickerColor;
-      Future.delayed(const Duration(seconds: 2),
-          (() => Navigator.pushReplacementNamed(context, 'home')));
-      mensajeInfo(context, "¡Felicidades!", "Personalización completa");
+    } else if (nameCtrl.text.isNotEmpty && lastNameCtrl.text.isEmpty ||
+        nameCtrl.text.isEmpty && lastNameCtrl.text.isNotEmpty) {
+      mensajeInfo(
+          context, "Algo anda mal", "Por favor llena los dos datos o ninguno");
+    } else {
+      Navigator.pop(context);
     }
   }
 
-  cancel() {
-    currentStep > 0 ? setState(() => currentStep -= 1) : null;
+  continuedColor() {
+    prefs.colorButton = pickerColor;
+    mensajeInfo(context, "Cambio realizado", "");
+    Future.delayed(const Duration(seconds: 1),
+        (() => Navigator.pushReplacementNamed(context, 'home')));
   }
 }

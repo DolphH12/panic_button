@@ -1,13 +1,13 @@
 // To parse this JSON data, do
 //
-//     final profileModel = profileModelFromJson(jsonString);
+//     final contactModel = contactModelFromJson(jsonString);
 
 import 'dart:convert';
 
-ProfileModel profileModelFromJson(String str) =>
+ProfileModel contactModelFromJson(String str) =>
     ProfileModel.fromJson(json.decode(str));
 
-String profileModelToJson(ProfileModel data) => json.encode(data.toJson());
+String contactModelToJson(ProfileModel data) => json.encode(data.toJson());
 
 class ProfileModel {
   ProfileModel({
@@ -18,6 +18,8 @@ class ProfileModel {
     required this.fechaVerificacion,
     required this.contacts,
     required this.cellPhone,
+    required this.firstSession,
+    required this.colour,
   });
 
   String username;
@@ -25,8 +27,10 @@ class ProfileModel {
   String name;
   String lastName;
   DateTime fechaVerificacion;
-  List<dynamic> contacts;
+  List<Contact> contacts;
   String cellPhone;
+  bool firstSession;
+  String colour;
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
         username: json["username"],
@@ -34,8 +38,11 @@ class ProfileModel {
         name: json["name"],
         lastName: json["lastName"],
         fechaVerificacion: DateTime.parse(json["fechaVerificacion"]),
-        contacts: List<dynamic>.from(json["contacts"].map((x) => x)),
+        contacts: List<Contact>.from(
+            json["contacts"].map((x) => Contact.fromJson(x))),
         cellPhone: json["cellPhone"],
+        firstSession: json["firstSession"],
+        colour: json["colour"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -44,7 +51,37 @@ class ProfileModel {
         "name": name,
         "lastName": lastName,
         "fechaVerificacion": fechaVerificacion.toIso8601String(),
-        "contacts": List<dynamic>.from(contacts.map((x) => x)),
+        "contacts": List<dynamic>.from(contacts.map((x) => x.toJson())),
+        "cellPhone": cellPhone,
+        "firstSession": firstSession,
+        "colour": colour,
+      };
+}
+
+class Contact {
+  Contact({
+    required this.name,
+    required this.lastName,
+    required this.email,
+    required this.cellPhone,
+  });
+
+  String name;
+  String lastName;
+  String email;
+  String cellPhone;
+
+  factory Contact.fromJson(Map<String, dynamic> json) => Contact(
+        name: json["name"],
+        lastName: json["lastName"],
+        email: json["email"],
+        cellPhone: json["cellPhone"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "lastName": lastName,
+        "email": email,
         "cellPhone": cellPhone,
       };
 }
