@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:panic_app/pages/camera_page.dart';
+import 'package:panic_app/pages/camera_view_page.dart';
 import 'package:panic_app/pages/configuration_page.dart';
 import 'package:panic_app/pages/contactos/add_contactos_page.dart';
 import 'package:panic_app/pages/contactos/ver_contactos_page.dart';
@@ -12,6 +14,7 @@ import 'package:panic_app/pages/map_2/visualizer2_page.dart';
 import 'package:panic_app/pages/profile_page.dart';
 import 'package:panic_app/pages/select_map_page.dart';
 import '../pages/firts_time/intro_page.dart';
+import '../pages/information_permission_page.dart';
 import '../pages/login_page.dart';
 import '../pages/otp_page.dart';
 import '../pages/register_page.dart';
@@ -35,6 +38,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'map1': (_) => const Visualizer1Page(),
   'detail1': (_) => const Detail1Page(),
   'map2': (_) => const Visualizer2Page(),
+  'informationPermission': (_) => const InformationPermissionPage(),
+  'camera': (_) => const CameraPage(),
+  'cameraView': (_) => const CameraViewPage(),
+  
 
   // 'proyectos': (_) => const ProyectosPage(),
   // 'info': (_) => const InformationPage(),

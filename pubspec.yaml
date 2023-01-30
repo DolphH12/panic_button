@@ -31,6 +31,7 @@ environment:
 dependencies:
   animate_do: ^2.1.0
   audioplayers: ^1.1.1
+  camera: ^0.10.2+1
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
@@ -52,6 +53,7 @@ dependencies:
   speech_to_text: ^6.1.0
   syncfusion_flutter_maps: ^20.3.56
   url_launcher: ^6.1.7
+  video_player: ^2.5.1
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -6,12 +6,15 @@ import 'package:panic_app/services/event_services.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
 import 'select_button_emergency.dart';
+import 'package:panic_app/widgets/camera_image_widget.dart';
+
 
 class SelectEmergencyWidget extends StatelessWidget {
   const SelectEmergencyWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     List<ListEventModel> events = [];
     EventService eventService = EventService();
     PreferenciasUsuario prefs = PreferenciasUsuario();

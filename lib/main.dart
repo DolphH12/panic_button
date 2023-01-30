@@ -7,14 +7,17 @@ import 'package:panic_app/routes/routes.dart';
 import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/services/internet_service.dart';
 import 'utils/preferencias_app.dart';
+import 'package:camera/camera.dart';
+import 'package:panic_app/pages/camera_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = PreferenciasUsuario();
-  await prefs.initPrefs();
+  await prefs.initPrefs();  
   await checkInternet();
+  cameras = await availableCameras();
   if (prefs.button == true) {
     activacion.startListening(null, null);
   }
@@ -27,7 +30,7 @@ const androidConfig = FlutterBackgroundAndroidConfig(
       "Background notification for keeping the example app running in the background",
   notificationImportance: AndroidNotificationImportance.Default,
   notificationIcon: AndroidResource(
-      name: 'background_icon',
+      name: 'background_icon',  
       defType: 'drawable'), // Default is ic_launcher from folder mipmap
 );
 

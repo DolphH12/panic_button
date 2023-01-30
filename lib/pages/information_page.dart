@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:geolocator/geolocator.dart';
+
+import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
 import 'package:panic_app/widgets/audio_palyer_widget.dart';
 import 'package:panic_app/widgets/btn_casual.dart';
 import 'package:panic_app/widgets/camera_image_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
+import '../services/event_services.dart';
 
 class InformationPage extends StatelessWidget {
   const InformationPage({Key? key}) : super(key: key);
@@ -12,40 +18,51 @@ class InformationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List args = ModalRoute.of(context)!.settings.arguments as List;
+    
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).primaryColorDark,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Row(
-              children: const [
-                Icon(Icons.arrow_back_ios_new),
-                Text("Regresar")
-              ],
+    return ProgressHUD(
+      backgroundColor: Theme.of(context).primaryColorDark,
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            foregroundColor: Theme.of(context).primaryColorDark,
+            elevation: 0,
+            leadingWidth: 100,
+            leading: GestureDetector(
+              onTap: ()  => {
+                image = null,
+                video = null,
+                Navigator.pop(context)
+              },
+
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: Row(
+                  children: const [
+                    Icon(Icons.arrow_back_ios_new),
+                    Text("Regresar")
+                  ],
+                ),
+              ),
+            ),
+            centerTitle: true,
+            title: Text(
+              "Agrega información",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
           ),
-        ),
-        centerTitle: true,
-        title: Text(
-          "Agrega información",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30.0),
-          child: ContainPresentation(type: args),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30.0),
+              child: ContainPresentation(type: args),
+            ),
+          ),
         ),
       ),
     );
@@ -80,9 +97,10 @@ class _ContainPresentationState extends State<ContainPresentation> {
             controller: tipoCtrl,
           ),
           DescripcionEmergency(controller: descCtrl),
-          UbicacionEmergencia(
-              ubiController: ubiCtrl, descUbiController: desUbiCtrl),
+          UbicacionEmergencia(ubiController: ubiCtrl, descUbiController: desUbiCtrl),
+              
           const EvidenciasEmergencia(),
+
           EnviarEmergencia(
             desUbiCtrl: desUbiCtrl,
             descCtrl: descCtrl,
@@ -259,7 +277,9 @@ class EvidenciasEmergencia extends StatelessWidget {
                 fontWeight: FontWeight.bold),
           ),
         ),
-        Center(child: CameraImageWidget())
+        Center(
+          child: CameraImageWidget()
+        )
       ],
     );
   }
@@ -283,8 +303,10 @@ class EnviarEmergencia extends StatefulWidget {
 }
 
 class _EnviarEmergenciaState extends State<EnviarEmergencia> {
+  
   PreferenciasUsuario prefs = PreferenciasUsuario();
   bool anonimo = false;
+  final eventService = EventService();
 
   @override
   Widget build(BuildContext context) {
@@ -329,15 +351,46 @@ class _EnviarEmergenciaState extends State<EnviarEmergencia> {
             children: [
               BtnCasual(
                   textobutton: "Cancelar",
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => {
+                    FocusScope.of(context).requestFocus(FocusNode()),
+                    video = null,
+                    image = null,
+                    Navigator.pop(context)
+                  },
+
                   width: MediaQuery.of(context).size.width / 3,
-                  colorBtn: Colors.grey),
+                  colorBtn: Colors.grey
+              ),
+
               BtnCasual(
                   textobutton: "Enviar",
-                  onPressed: () {
-                    Navigator.pushNamed(context, 'home');
-                    mensajeInfo(context, "Envío exitoso",
-                        "Evidencias enviadas correctamente.");
+                  onPressed: () async {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    final progress = ProgressHUD.of(context);
+                    progress!.show();
+                    Position position = await determinePosition();
+                    // progress.show();
+                    if(await eventService.addEvent(position, 10, widget.descCtrl.text)) {
+                      if(await eventService.attachFiles(image?.path, recordFilePath , video)) {
+                        if(!mounted) return;
+                        video = null;
+                        image = null;
+                        Navigator.pushNamed(context, 'home');
+                          mensajeInfo(context, "Envío exitoso",
+                              "Evidencias enviadas correctamente.");
+                      }
+                    } else {
+                      if(!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No fue posible el envío de evidencias, intenta de nuevo.'),
+                        ),
+                      );
+                    }
+                    
+                    Future.delayed(const Duration(seconds: 5), () {
+                      progress.dismiss();
+                    });
                   },
                   width: MediaQuery.of(context).size.width / 3,
                   colorBtn: prefs.colorButton),

@@ -8,9 +8,11 @@ import '../utils/preferencias_app.dart';
 class EventService {
   final _prefs = PreferenciasUsuario();
   final ip = 'http://sistemic.udea.edu.co:4000';
-
-  Future<String> addEvent(Position location, int type, String comment) async {
+  
+  Future<bool> addEvent(Position location, int type, String comment) async {
+    
     final username = _prefs.username;
+
     var headers = {
       'Authorization': 'Bearer ${_prefs.token}',
       'Content-Type': 'application/json',
@@ -29,15 +31,15 @@ class EventService {
 
     if (response.statusCode == 201) {
       print(await response.stream.bytesToString());
-      return "ok";
+      return true;
     } else {
       // print(response.reasonPhrase);
-      return "";
+      return false;
       // print(response.reasonPhrase);
     }
   }
 
-  Future<bool> attachFiles(String? image, String? audio) async {
+  Future<bool> attachFiles(String? image, String? audio, String? video) async {
     final username = _prefs.username;
 
     var headers = {
@@ -46,18 +48,14 @@ class EventService {
 
     var request = http.MultipartRequest(
         'POST', Uri.parse('$ip/reto/events/files/anexar/usuarios/$username'));
+    
+    print(video);
+    print(image);
 
-    if (image == null || audio == null) {
-      if ((image == null) && !(audio == null)) {
-        request.files.add(await http.MultipartFile.fromPath('audios', audio));
-      } else if (!(image == null) && (audio == null)) {
-        request.files.add(await http.MultipartFile.fromPath('imagenes', image));
-      }
-    } else {
-      request.files.add(await http.MultipartFile.fromPath('imagenes', image));
-      request.files.add(await http.MultipartFile.fromPath('audios', audio));
-    }
-    // request.files.add(await http.MultipartFile.fromPath('videos', '/path/to/file'));
+    image == null ? null : request.files.add(await http.MultipartFile.fromPath('imagenes', image));
+    audio == null ? null : request.files.add(await http.MultipartFile.fromPath('audios', audio));
+    video == null ? null : request.files.add(await http.MultipartFile.fromPath('videos', video));
+
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
