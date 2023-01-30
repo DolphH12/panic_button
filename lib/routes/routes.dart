@@ -8,11 +8,8 @@ import 'package:panic_app/pages/firts_time/presentate_page.dart';
 import 'package:panic_app/pages/home_page.dart';
 import 'package:panic_app/pages/information_page.dart';
 import 'package:panic_app/pages/internet_failed_page.dart';
-import 'package:panic_app/pages/map_1/detail1_page.dart';
-import 'package:panic_app/pages/map_1/visualizer1_page.dart';
-import 'package:panic_app/pages/map_2/visualizer2_page.dart';
+import 'package:panic_app/pages/mapa/visualizer_page.dart';
 import 'package:panic_app/pages/profile_page.dart';
-import 'package:panic_app/pages/select_map_page.dart';
 import '../pages/firts_time/intro_page.dart';
 import '../pages/information_permission_page.dart';
 import '../pages/login_page.dart';
@@ -34,13 +31,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'add': (_) => const AddContactPage(),
   'config': (_) => const ConfigurationPage(),
   'internet': (_) => const InternetFailedPage(),
-  'selectMap': (_) => const SelectMapPage(),
-  'map1': (_) => const Visualizer1Page(),
-  'detail1': (_) => const Detail1Page(),
-  'map2': (_) => const Visualizer2Page(),
   'informationPermission': (_) => const InformationPermissionPage(),
   'camera': (_) => const CameraPage(),
   'cameraView': (_) => const CameraViewPage(),
+  'map' : (_) => const VisualizerPage()
   
 
   // 'proyectos': (_) => const ProyectosPage(),

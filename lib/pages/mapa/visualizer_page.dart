@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
+import 'package:panic_app/utils/utils.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/map_event_model.dart';
 import '../../models/map_zone_model.dart';
@@ -10,19 +16,22 @@ import '../../widgets/cupertino_list_tile_widget.dart';
 import 'event_detail_page.dart';
 
 
-class Visualizer2Page extends StatefulWidget {
-  const Visualizer2Page({super.key});
+class VisualizerPage extends StatefulWidget {
+  const VisualizerPage({super.key});
 
   @override
-  State<Visualizer2Page> createState() => _MainScreenState();
+  State<VisualizerPage> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<Visualizer2Page> {
+class _MainScreenState extends State<VisualizerPage> {
   final eventService = EventService();
 
-  bool showZones = true;
+  bool showZones = false;
   bool showEvents = true;
-  bool showDateFilter = true;
+  bool showCards = true;
+  bool showDateFilter = false;
+  bool showChangeMap = false;
+  bool showEmergency = true;
   bool typeOfMap = true;
   DateTimeRange filterDateRange = DateTimeRange(
     start: DateTime(2022, 1, 1),
@@ -37,6 +46,7 @@ class _MainScreenState extends State<Visualizer2Page> {
   late List<MapEvent> _mapEvents;
   late List<MapEvent> _filteredEvents;
   late List<MapZone> _mapZones;
+  late List<MapEvent> _mapEmergencys;
 
   late int _currentSelectedIndex;
   late int _previousSelectedIndex;
@@ -101,9 +111,57 @@ class _MainScreenState extends State<Visualizer2Page> {
     return '${date.day} $month ${date.year} ';
   }
 
+  Widget getImage64(String image64,int index, double markerSize){
+    Uint8List image = base64Decode(image64);
+
+
+    if (image64 != ''){
+      return SizedBox(
+        width: markerSize + 20,
+        height: markerSize + 20,
+        child: FittedBox(
+          fit: BoxFit.fill,
+          child: Image.memory(
+            image,
+          ),
+        ),
+      );}
+      else {
+        return Icon(
+          Icons.location_on,
+          color: _currentSelectedIndex == index
+          ? Colors.blue : Colors.red,
+          size: markerSize);
+      }
+  }
+
+  Widget propDetail({required String title, String? content}) {
+    
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          textAlign: TextAlign.start,
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+        ),
+        content != null
+            ? Text(
+                content,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color.fromARGB(248, 16, 16, 18)),
+              )
+            : const SizedBox()
+      ],
+    );
+  }
+
   Future fetchEvents() async {
     final events = await eventService.getEvents();
-    print(events);
     for (final event in events['data']) {
       _mapEvents.add(MapEvent(
           id: event['id'],
@@ -114,12 +172,38 @@ class _MainScreenState extends State<Visualizer2Page> {
           latitude: event['location'][0],
           longitude: event['location'][1],
           description: "",
-          comment: event['comment']));
-    }
+          comment: event['comment'], 
+          direction: '', 
+          kind: 0, 
+          phone: '', 
+          icon: '',
+          type: event['typeEmergency']
+          ));
+          _mapEvents.add(MapEvent(
+          id: event['id'],
+          date: event['date'],
+          status: event['status'],
+          time: event['time'],
+          zoneCode: event['zone'],
+          latitude: 6.272622, 
+          longitude: -75.608296,
+          description: "",
+          comment: 'evento fake', 
+          direction: '', 
+          kind: 0, 
+          phone: '', 
+          icon: '',
+          type: 12
+          ));
+    } 
+    print("cargando eventos");  
   }
+
+  
 
   Future fetchZones() async {
     final zones = await eventService.getZones();
+
     for (final zone in zones['data']) {
       _mapZones.add(MapZone(
         code: zone['zoneCode'],
@@ -132,10 +216,35 @@ class _MainScreenState extends State<Visualizer2Page> {
     }
   }
 
+  Future fetchEmergency() async{
+    final emergencys = await eventService.getEmergency();
+    double desplazar = 0;
+    for (final emergency in emergencys['data']) {
+      
+      _mapEmergencys.add(MapEvent(
+      id: emergency['name'], 
+      latitude: 6.27296 - desplazar,//emergency['location'][0], 
+      longitude: -75.59059 + desplazar,//emergency['location'], 
+      description: 'Policia',//emergency['description'], 
+      phone: emergency['phone'], 
+      direction: 'direction', //emergency['direction']
+      comment: '', 
+      date: '', 
+      kind: 1, 
+      status: 0, 
+      time: '', 
+      zoneCode: 100, 
+      icon: emergency['image'],
+      type: 1
+      )); 
+      desplazar = desplazar + 0.01;    
+    }
+    desplazar = 0;
+  }
+
   void loadFilteredEvents() {
     _mapController.clearMarkers();
     _filteredEvents.clear();
-
     print("Switching");
 
     if (showEvents) {
@@ -144,17 +253,23 @@ class _MainScreenState extends State<Visualizer2Page> {
       for (MapEvent mapEvent in _mapEvents) {
         final eventDate = DateTime.parse('${mapEvent.date} ${mapEvent.time}');
 
-        if (eventDate.isAfter(filterDateRange.start) &&
-            eventDate.isBefore(filterDateRange.end)) {
           _filteredEvents.add(mapEvent);
           _mapController.insertMarker(markersCount);
           markersCount++;
-        }
       }
     } else {
       print("disabled");
     }
 
+    if (showEmergency){
+      int totalMarkers = _filteredEvents.length;
+      _filteredEvents.addAll(_mapEmergencys);      
+      for (MapEvent map in _mapEmergencys){
+        _mapController.insertMarker(totalMarkers);
+        totalMarkers++;
+        
+      }
+    }
     setState(() {});
   }
 
@@ -188,17 +303,20 @@ class _MainScreenState extends State<Visualizer2Page> {
   @override
   void initState() {
     super.initState();
-    _currentSelectedIndex = 0;
+    _currentSelectedIndex = 0;                   //El evento seleccionado al iniciar el mapa es el 0
     _canUpdateFocalLatLng = true;
     _mapController = MapTileLayerController();
     _mapEvents = <MapEvent>[];
     _filteredEvents = <MapEvent>[];
     _mapZones = <MapZone>[];
+    _mapEmergencys = <MapEvent>[];
 
     Future.delayed(const Duration(seconds: 0), () async {
       await fetchEvents();
       await fetchZones();
+      await fetchEmergency();
       loadFilteredEvents();
+
     });
 
     _zoomPanBehavior = MapZoomPanBehavior(
@@ -209,7 +327,7 @@ class _MainScreenState extends State<Visualizer2Page> {
         enableDoubleTapZooming: true,
         toolbarSettings: const MapToolbarSettings(direction: Axis.vertical));
 
-    _cardHeight = 120;
+    _cardHeight = 80;
 
     _pageViewController = PageController(
         initialPage: _currentSelectedIndex, viewportFraction: 0.8);
@@ -283,7 +401,7 @@ class _MainScreenState extends State<Visualizer2Page> {
                   ),
                 ))
             : const SizedBox(),
-        Align(
+        showChangeMap ? Align(
           alignment: Alignment.topRight,
           child: Container(
             margin: const EdgeInsets.only(right: 8, top: 128),
@@ -306,7 +424,8 @@ class _MainScreenState extends State<Visualizer2Page> {
                     color: CupertinoColors.secondaryLabel,
                   ),
                   onPressed: () {
-                    setState(() {
+                    
+                    setState(() { 
                       typeOfMap = !typeOfMap;
                     });
                   },
@@ -314,7 +433,7 @@ class _MainScreenState extends State<Visualizer2Page> {
               ),
             ),
           ),
-        )
+        ) : const SizedBox()
       ],
     );
   }
@@ -336,56 +455,20 @@ class _MainScreenState extends State<Visualizer2Page> {
                         : 'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                     zoomPanBehavior: _zoomPanBehavior,
                     controller: _mapController,
+                    //_filteredEvents = _filteredEvents.addAll(_mapEmergencys),
                     initialMarkersCount: _filteredEvents.length,
                     tooltipSettings: const MapTooltipSettings(
                       color: Colors.transparent,
                     ),
-                    markerTooltipBuilder: (BuildContext context, int index) {
-                      return ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 5.0, bottom: 5.0),
-                                width: 150,
-                                color: Colors.white,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        _filteredEvents[index].description,
-                                        style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 5.0),
-                                        child: Text(
-                                          _filteredEvents[index].comment,
-                                          style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.black),
-                                        ),
-                                      )
-                                    ]),
-                              ),
-                            ]),
-                      );
-                    },
-                    markerBuilder: (BuildContext context, int index) {
+                    
+                    markerBuilder: (BuildContext context, int index) {   //cambio entre marcadores
                       final double markerSize =
                           _currentSelectedIndex == index ? 40 : 25;
                       return MapMarker(
                         latitude: _filteredEvents[index].latitude,
                         longitude: _filteredEvents[index].longitude,
                         alignment: Alignment.bottomCenter,
-                        child: GestureDetector(
+                        child: GestureDetector(     //funcion al presionar un marcador
                           onTap: () {
                             final progress = ProgressHUD.of(context);
                             progress!.show();
@@ -393,16 +476,18 @@ class _MainScreenState extends State<Visualizer2Page> {
                             if (_currentSelectedIndex != index) {
                               _canUpdateFocalLatLng = false;
                               _tappedMarkerIndex = index;
-                              _pageViewController.animateToPage(
+                              _pageViewController.animateToPage(   //se cambia la tarjeta de evento por la presionada
                                 index,
-                                duration: const Duration(milliseconds: 500),
+                                duration: const Duration(milliseconds: 200),
                                 curve: Curves.easeInOut,
                               );
                             }
 
-                            Future.delayed(const Duration(seconds: 1), () {
+                            if(_filteredEvents[index].kind == 0){                          
+                            Future.delayed(const Duration(seconds: 1), () { //ingresamos a los detalles de un evento o emergency
                               progress.dismiss();
-                              Navigator.push(
+                              
+                                Navigator.push(                                
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => EventDetailPage(
@@ -410,19 +495,80 @@ class _MainScreenState extends State<Visualizer2Page> {
                                       ),
                                 ),
                               );
-                            });
+                              }                              
+                            );
+                            }else {
+                              Future.delayed(const Duration(milliseconds: 100), () {
+                                progress.dismiss();
+
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog( 
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15)
+                                    ),                                                                       
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,                                      
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10.0),
+                                          width: double.infinity,
+                                          decoration: const BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(width: 2.0, color: Colors.black38),
+                                            ),
+                                          ),
+                                          child: Text(_filteredEvents[index].id,
+                                            style: TextStyle(
+                                            color: Theme.of(context).primaryColorDark,
+                                            fontWeight: FontWeight.bold,  
+                                            fontSize: 40,                                     
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 20),
+                                        
+                                        getImage64(_filteredEvents[index].icon,index,100),
+                                        const SizedBox(height: 20),
+                                        propDetail(title: 'Nombre :  ',content: _filteredEvents[index].id),
+                                        const SizedBox(height: 22),
+                                        propDetail(title: 'Descripción :  ', content: _filteredEvents[index].description),
+                                        const SizedBox(height: 22),
+                                        propDetail(title: 'Ubicación :  ', content: _filteredEvents[index].direction),
+                                        const SizedBox(height: 7),
+                                        Row(
+                                          children: [
+                                            propDetail(title: 'Telefono :  ' , content: _filteredEvents[index].phone),
+                                            const SizedBox(width: 20,),
+                                            const FloatingCall(),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [                                      
+                                              ElevatedButton(onPressed: (){
+                                              Navigator.pop(context);
+                                              }, 
+                                              child: const Text('Cerrar')
+                                              ),                                           
+                                      ]                                  
+                                    );
+                                  }
+                                  );
+                              });
+                            }
+
                           },
-                          child: AnimatedContainer(
+                          child: AnimatedContainer(         //se redibuja el marcador cambiando color y tamaño 
                             duration: const Duration(milliseconds: 250),
                             height: markerSize,
                             width: markerSize,
-                            child: FittedBox(
-                              child: Icon(Icons.location_on,
-                                  color: _currentSelectedIndex == index
-                                      ? Colors.blue
-                                      : Colors.red,
-                                  size: markerSize),
-                            ),
+                            child: getImage64(_filteredEvents[index].icon,index,markerSize)
+                            
+                            
                           ),
                         ),
                       );
@@ -448,32 +594,32 @@ class _MainScreenState extends State<Visualizer2Page> {
                 ],
               ),
               mapFilters(),
-              showEvents
+              showCards && showEvents         //TARJETAS
                   ? Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        height: _cardHeight,
-                        padding: const EdgeInsets.only(bottom: 8),
+                        height: _cardHeight,    //tamaño de la tarjeta
+                        padding: const EdgeInsets.only(bottom: 8), //distancia de la parte inferior de la tarjeta
                         child: PageView.builder(
-                          itemCount: _filteredEvents.length,
+                          itemCount: _filteredEvents.length,      //numero de tarjetas a crear
                           onPageChanged: _handlePageChange,
                           controller: _pageViewController,
                           itemBuilder: (BuildContext context, int index) {
-                            final MapEvent item = _filteredEvents[index];
+                            final MapEvent item = _filteredEvents[index];   //
                             return Transform.scale(
-                              scale: index == _currentSelectedIndex ? 1 : 0.85,
+                              scale: index == _currentSelectedIndex ? 1 : 0.85,  //tamaño tarjeta dependiendo de seleccionado
                               child: Stack(
                                 children: <Widget>[
                                   Container(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(10.0),    //margenes internas tarjeta
                                     decoration: BoxDecoration(
                                       color: Colors.white.withAlpha(190),
                                       border: Border.all(
-                                        color: Colors.transparent,
+                                        color: Colors.transparent,    //tarjeta sin borde
                                         width: 0,
                                       ),
                                       boxShadow: const [
-                                        BoxShadow(
+                                        BoxShadow(              //sombra de la tarjeta
                                             color: Colors.black12,
                                             blurRadius: 8,
                                             offset: Offset.zero)
@@ -485,18 +631,18 @@ class _MainScreenState extends State<Visualizer2Page> {
                                       Expanded(
                                           child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                            CrossAxisAlignment.center,
                                         children: <Widget>[
                                           Text(_filteredEvents[index].comment,
-                                              maxLines: 2,
+                                              maxLines: 2,        //maximo dos lineas de mensaje en la tarjeta
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 16),
                                               textAlign: TextAlign.start),
                                           const SizedBox(height: 4),
-                                          Expanded(
+                                          Expanded(                   //Aqui se agrega la descripcion.
                                               child: Text(
-                                            item.description,
+                                            item.description,       //descripcion.  
                                             style:
                                                 const TextStyle(fontSize: 14),
                                             overflow: TextOverflow.ellipsis,
@@ -529,7 +675,7 @@ class _MainScreenState extends State<Visualizer2Page> {
                                           Future.delayed(
                                               const Duration(seconds: 1), () {
                                             progress.dismiss();
-                                            Navigator.push(
+                                            Navigator.push(         //navegacion a 
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
@@ -708,6 +854,66 @@ class _MainScreenState extends State<Visualizer2Page> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class FloatingCall extends StatefulWidget {
+  const FloatingCall({super.key});
+
+  @override
+  State<FloatingCall> createState() => _FloatingCallState();
+}
+
+class _FloatingCallState extends State<FloatingCall>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+
+  static const List<IconData> icons = [
+    Icons.local_police,
+    Icons.notification_important
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor = Colors.white;
+    Color foregroundColor = prefs.colorButton;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 60,
+          width: 50,
+          alignment: FractionalOffset.topCenter,
+          child: FloatingActionButton(
+              heroTag: null,
+              backgroundColor: backgroundColor,
+              child: Icon(Icons.call, color: foregroundColor),
+              onPressed: () async {
+                
+                  final call = Uri.parse('tel:${112}');
+                  if (await canLaunchUrl(call)) {
+                    launchUrl(call);
+                  } else {
+                    throw 'Could not launch $call';
+                  }
+                
+              },
+            ),
+          
+        )
+      ]
+    
     );
   }
 }
