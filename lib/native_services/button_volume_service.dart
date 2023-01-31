@@ -51,9 +51,11 @@ class ActivacionBotton {
   }
   
   void _message() async{
+    print("creando envio");
     Position position = await determinePosition();
     final buttonemergency = await eventService.addEvent(position, 1 , "Evento externo, botones de volumen");
-    if(buttonemergency =="ok"){
+    print(buttonemergency);
+    if(buttonemergency == true){
       print("enviado");
       var context  =  navigatorKey.currentContext;
       mensajeInfo(context!,  "Alerta de emergencia enviada!", "");
