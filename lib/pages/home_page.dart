@@ -126,7 +126,7 @@ class MenuDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                   leading: const Icon(Icons.map),
-                  onTap: () => Navigator.pushNamed(context, 'selectMap'),
+                  onTap: () => Navigator.pushNamed(context, 'map'),
                 ),
                 const SizedBox(
                   height: 25,

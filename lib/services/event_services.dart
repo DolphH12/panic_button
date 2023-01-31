@@ -211,4 +211,28 @@ class EventService {
       return [];
     }
   }
+  Future<Map<String, dynamic>> getEmergency() async {
+    var headers = {
+      //'Authorization': 'Bearer ${_prefs.token}',
+      'Cookie': 'color=rojo'
+    };
+
+    try {
+      var request =
+          http.Request('GET', Uri.parse('$ip/parametrizacion/boton/emergencyagency/listar'));
+      request.headers.addAll(headers);
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode != 200) throw Exception('${response.statusCode}');
+
+      return {
+        'status': true,
+        'data': jsonDecode(await response.stream.bytesToString())
+      };
+    } catch (e) {
+      return {
+        'status': false,
+        'data': {'message': e.toString()}
+      };
+    }
+  }
 }
