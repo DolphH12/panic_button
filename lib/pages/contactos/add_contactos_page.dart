@@ -190,7 +190,7 @@ class ImageAvatar extends StatelessWidget {
               borderRadius: BorderRadius.circular(100)),
         ),
         const CircleAvatar(
-          backgroundImage: AssetImage("assets/alert.png"),
+          backgroundImage: AssetImage("assets/usuario.png"),
           radius: 50,
           backgroundColor: Colors.white,
         ),

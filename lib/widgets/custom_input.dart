@@ -6,6 +6,7 @@ class CustomInput extends StatefulWidget {
   final TextEditingController textController;
   final TextInputType keyboardType;
   final bool isPassword;
+  final bool? disabled;
 
   const CustomInput(
       {Key? key,
@@ -13,7 +14,8 @@ class CustomInput extends StatefulWidget {
       required this.placehoder,
       required this.textController,
       required this.keyboardType,
-      this.isPassword = false})
+      this.isPassword = false,
+      this.disabled})
       : super(key: key);
 
   @override
@@ -34,6 +36,7 @@ class _CustomInputState extends State<CustomInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.only(right: 20, top: 5, left: 5, bottom: 5),
       margin: const EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
@@ -46,6 +49,7 @@ class _CustomInputState extends State<CustomInput> {
                 blurRadius: 5)
           ]),
       child: TextField(
+        enabled: widget.disabled,
         controller: widget.textController,
         cursorColor: Theme.of(context).primaryColor,
         autocorrect: false,

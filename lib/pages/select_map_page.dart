@@ -45,7 +45,7 @@ class OptionsMap extends StatelessWidget {
                 "Seleccione un visualizador",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).primaryColorDark,
                     fontSize: 25,
                     fontWeight: FontWeight.bold),
               ),

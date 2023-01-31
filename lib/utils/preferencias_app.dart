@@ -101,4 +101,12 @@ class PreferenciasUsuario {
   set colorButton(Color color) {
     _prefs.setInt('colorButton', color.value);
   }
+
+  bool get permissionDeniedCamera {
+    return _prefs.getBool('permissionInitial') ?? false;
+  }
+
+  set permissionDeniedCamera(bool value) {
+    _prefs.setBool('permissionInitial', value);
+  }
 }

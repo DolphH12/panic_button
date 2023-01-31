@@ -1,543 +1,403 @@
-import 'dart:io';
-
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:panic_app/services/event_services.dart';
+
+import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
+import 'package:panic_app/widgets/audio_palyer_widget.dart';
 import 'package:panic_app/widgets/btn_casual.dart';
-import 'package:panic_app/widgets/btn_ppal.dart';
+import 'package:panic_app/widgets/camera_image_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:record_mp3/record_mp3.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../services/event_services.dart';
 
 class InformationPage extends StatelessWidget {
   const InformationPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final int args = ModalRoute.of(context)!.settings.arguments as int;
-    final position;
+    final List args = ModalRoute.of(context)!.settings.arguments as List;
+    
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).primaryColorDark,
-        elevation: 0,
-        leadingWidth: 200,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
-            child: Row(
-              children: const [
-                Icon(Icons.arrow_back_ios_new),
-                Text("Regresar")
-              ],
+    return ProgressHUD(
+      backgroundColor: Theme.of(context).primaryColorDark,
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            foregroundColor: Theme.of(context).primaryColorDark,
+            elevation: 0,
+            leadingWidth: 100,
+            leading: GestureDetector(
+              onTap: ()  => {
+                image = null,
+                video = null,
+                Navigator.pop(context)
+              },
+
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: Row(
+                  children: const [
+                    Icon(Icons.arrow_back_ios_new),
+                    Text("Regresar")
+                  ],
+                ),
+              ),
+            ),
+            centerTitle: true,
+            title: Text(
+              "Agrega información",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
           ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30.0),
-          child: ContainPresentation(type: args),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30.0),
+              child: ContainPresentation(type: args),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-class ContainPresentation extends StatelessWidget {
+class ContainPresentation extends StatefulWidget {
   const ContainPresentation({super.key, required this.type});
 
-  final int type;
+  final List type;
+
+  @override
+  State<ContainPresentation> createState() => _ContainPresentationState();
+}
+
+class _ContainPresentationState extends State<ContainPresentation> {
+  TextEditingController tipoCtrl = TextEditingController();
+  TextEditingController descCtrl = TextEditingController();
+  TextEditingController ubiCtrl = TextEditingController();
+  TextEditingController desUbiCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TipoDeEventoInfo(
+            type: widget.type,
+            controller: tipoCtrl,
+          ),
+          DescripcionEmergency(controller: descCtrl),
+          UbicacionEmergencia(ubiController: ubiCtrl, descUbiController: desUbiCtrl),
+              
+          const EvidenciasEmergencia(),
+
+          EnviarEmergencia(
+            desUbiCtrl: desUbiCtrl,
+            descCtrl: descCtrl,
+            tipoCtrl: tipoCtrl,
+            ubiCtrl: ubiCtrl,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class TipoDeEventoInfo extends StatelessWidget {
+  const TipoDeEventoInfo(
+      {super.key, required this.type, required this.controller});
+
+  final List type;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = type[1] == 'Otro';
+    controller.text = disabled ? '' : type[1];
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Agrega información",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
+        const Padding(
+          padding: EdgeInsets.only(left: 8.0),
+          child: Text(
+            "Tipo de Evento",
+            style: TextStyle(
+                color: Colors.black54,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+          ),
         ),
-        Expanded(
-            child: StepPresentation(
-          type: type,
-        ))
+        CustomInput(
+          icon: Icons.emergency,
+          placehoder: "Escribe el tipo",
+          textController: controller,
+          keyboardType: TextInputType.text,
+          disabled: disabled,
+        ),
       ],
     );
   }
 }
 
-class StepPresentation extends StatefulWidget {
-  const StepPresentation({
-    Key? key,
-    required this.type,
-  }) : super(key: key);
+class DescripcionEmergency extends StatefulWidget {
+  const DescripcionEmergency({super.key, required this.controller});
 
-  final int type;
+  final TextEditingController controller;
 
   @override
-  State<StepPresentation> createState() => _StepPresentationState();
+  State<DescripcionEmergency> createState() => _DescripcionEmergencyState();
 }
 
-class _StepPresentationState extends State<StepPresentation> {
-  int currentStep = 0;
-  TextEditingController commentCtrl = TextEditingController();
-  EventService eventService = EventService();
-  PreferenciasUsuario prefs = PreferenciasUsuario();
-  String state = "";
-  File? image;
-  final ImagePicker _imagePicker = ImagePicker();
+class _DescripcionEmergencyState extends State<DescripcionEmergency> {
+  bool audio = false;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Row(
+            children: [
+              const Text(
+                "Describe la emergencia",
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                  onPressed: () => mensajeInfo(context, "Información",
+                      "Puedes agregar informacion o grabar un audio para describir el evento."),
+                  icon: const Icon(Icons.info))
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Flexible(
+              flex: 10,
+              child: CustomInput(
+                icon: Icons.messenger,
+                placehoder: "Descripción",
+                textController: widget.controller,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+            Flexible(
+              flex: 2,
+              child: FloatingActionButton.small(
+                onPressed: () => setState(() => audio = !audio),
+                child: const Icon(Icons.mic),
+              ),
+            )
+          ],
+        ),
+        audio ? const AudioPlayerWidget() : const SizedBox()
+      ],
+    );
+  }
+}
 
-  bool loading = false;
+class UbicacionEmergencia extends StatelessWidget {
+  const UbicacionEmergencia(
+      {super.key,
+      required this.ubiController,
+      required this.descUbiController});
 
-  final audioPlayer = AudioPlayer();
-  bool boolButton = false;
-  String statusText = "";
-  bool isComplete = false;
-  bool isRecording = false;
-  String? recordFilePath;
-  bool isPlaying = false;
-  Duration duration = Duration.zero;
-  Duration position = Duration.zero;
+  final TextEditingController ubiController;
+  final TextEditingController descUbiController;
 
   @override
   Widget build(BuildContext context) {
-    if (mounted) {
-      initPlayer();
-    }
-
-    return Stepper(
-        controlsBuilder: (context, details) {
-          return BtnPpal(textobutton: 'Continuar', onPressed: continued);
-        },
-        type: StepperType.vertical,
-        physics: const ScrollPhysics(),
-        currentStep: currentStep,
-        onStepTapped: (value) => tapped(value),
-        onStepContinue: () => continued,
-        onStepCancel: () => cancel,
-        steps: [
-          Step(
-              title: const Text("Descripción"),
-              content: Column(
-                children: [
-                  const Text(
-                    "Describe la emergencia",
-                    style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  CustomInput(
-                      icon: Icons.message,
-                      placehoder: "Descripción",
-                      textController: commentCtrl,
-                      keyboardType: TextInputType.text),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Row(
+            children: [
+              const Text(
+                "Ubicación del evento",
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
-              isActive: currentStep > 0,
-              state: currentStep > 0 ? StepState.complete : StepState.disabled),
-          Step(
-              title: const Text("Evidencias"),
-              content: Column(
+              IconButton(
+                  onPressed: () => mensajeInfo(context, "Información",
+                      "Puedes agregar informacion acerca del evento. Si tu ubicación es diferente a la del evento, escribela."),
+                  icon: const Icon(Icons.info))
+            ],
+          ),
+        ),
+        CustomInput(
+          icon: Icons.location_on,
+          placehoder: "Ubicación",
+          textController: ubiController,
+          keyboardType: TextInputType.text,
+        ),
+        CustomInput(
+          icon: Icons.add_location,
+          placehoder: "Descripcion de la Ubicación",
+          textController: descUbiController,
+          keyboardType: TextInputType.text,
+        ),
+      ],
+    );
+  }
+}
+
+class EvidenciasEmergencia extends StatelessWidget {
+  const EvidenciasEmergencia({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Padding(
+          padding: EdgeInsets.only(left: 8.0),
+          child: Text(
+            "Evidencias Adicionales",
+            style: TextStyle(
+                color: Colors.black54,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+        Center(
+          child: CameraImageWidget()
+        )
+      ],
+    );
+  }
+}
+
+class EnviarEmergencia extends StatefulWidget {
+  const EnviarEmergencia(
+      {super.key,
+      required this.tipoCtrl,
+      required this.descCtrl,
+      required this.ubiCtrl,
+      required this.desUbiCtrl});
+
+  final TextEditingController tipoCtrl;
+  final TextEditingController descCtrl;
+  final TextEditingController ubiCtrl;
+  final TextEditingController desUbiCtrl;
+
+  @override
+  State<EnviarEmergencia> createState() => _EnviarEmergenciaState();
+}
+
+class _EnviarEmergenciaState extends State<EnviarEmergencia> {
+  
+  PreferenciasUsuario prefs = PreferenciasUsuario();
+  bool anonimo = false;
+  final eventService = EventService();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
                 children: [
                   const Text(
-                    "Sube tu evidencia",
-                    style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
+                    "NO",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  BtnCasual(
-                      textobutton: "Imagen",
-                      onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Escoge'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  BtnCasual(
-                                      textobutton: "Cámara",
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        selectImage(1);
-                                      },
-                                      width: 100,
-                                      colorBtn:
-                                          Theme.of(context).primaryColorDark),
-                                  const SizedBox(height: 15,),
-                                  BtnCasual(
-                                      textobutton: "Galeria",
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        selectImage(2);
-                                      },
-                                      width: 100,
-                                      colorBtn:
-                                          Theme.of(context).primaryColorDark)
-                                ],
-                              ),
-                              actions: [
-                                BtnCasual(
-                                    textobutton: 'Aceptar',
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    width: 100,
-                                    colorBtn: Theme.of(context).primaryColor)
-                              ],
-                            ),
-                          ),
-                      width: 100,
-                      colorBtn: Theme.of(context).primaryColorDark),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  image != null
-                      ? SizedBox(
-                          width: 300,
-                          height: 300,
-                          child: Image.file(
-                            image!,
-                            fit: BoxFit.cover,
-                          ))
-                      : const SizedBox(),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Card(
-                    elevation: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 15),
-                        const Text(
-                          "*Graba un audio contando lo ocurrido",
-                          style: TextStyle(color: Colors.black54),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).primaryColorDark,
-                              elevation: 7),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 8),
-                            child: Icon(
-                              isRecording ? Icons.stop : Icons.mic,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                          onPressed: () async {
-                            if (isRecording) {
-                              stopRecord();
-                              position = const Duration(seconds: 0);
-                              setState(() {
-                                
-                              });
-                            } else {
-                              boolButton = true;
-                              startRecord();
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor:
-                                  Theme.of(context).primaryColorDark,
-                              child: IconButton(
-                                onPressed: () async {
-                                  if (isPlaying) {
-                                    await audioPlayer.pause();
-                                  } else if (boolButton) {
-                                    await audioPlayer.resume();
-                                  }
-                                },
-                                icon: Icon(
-                                  isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                ),
-                                iconSize: 25,
-                              ),
-                            ),
-                            
-                            SizedBox(
-                              width: 200,
-                              child: Column(
-                                children: [
-                                  Slider(
-                                    thumbColor: Colors.black26,
-                                    inactiveColor: Colors.black12,
-                                    activeColor: Theme.of(context).primaryColor,
-                                    min: 0,
-                                    max: duration.inSeconds.toDouble(),
-                                    value: position.inSeconds.toDouble(),
-                                    onChanged: (value) async {
-                                      position =
-                                          Duration(seconds: value.toInt());
-                                      await audioPlayer.seek(position);
-                                      await audioPlayer.resume();
-                                    },
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                        formatTime(position),
-                                        style: const TextStyle(
-                                            color: Colors.black),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        formatTime(duration),
-                                        style: const TextStyle(
-                                            color: Colors.black),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 50,
+                  Switch(
+                      activeColor: prefs.colorButton,
+                      value: anonimo,
+                      onChanged: (value) => setState(() => anonimo = value)),
+                  // onChanged: null),
+                  const Text(
+                    "SI",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
-              isActive: currentStep > 0,
-              state: currentStep > 0 ? StepState.complete : StepState.disabled)
-        ]);
-  }
+              const SizedBox(
+                width: 20,
+              ),
+              const Text(
+                "¿Enviar Anonimo?",
+                style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              BtnCasual(
+                  textobutton: "Cancelar",
+                  onPressed: () => {
+                    FocusScope.of(context).requestFocus(FocusNode()),
+                    video = null,
+                    image = null,
+                    Navigator.pop(context)
+                  },
 
-  Future selectImage(option) async {
-    XFile? pickedFile;
-    if (option == 1) {
-      pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
-    } else {
-      pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-    }
-    setState(() {
-      if (pickedFile != null) {
-        image = File(pickedFile.path);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Imagen no seleccionada")));
-      }
-    });
-  }
+                  width: MediaQuery.of(context).size.width / 3,
+                  colorBtn: Colors.grey
+              ),
 
-  tapped(int value) {
-    setState(() {
-      currentStep = value;
-    });
-  }
-
-  continued() async {
-    if (currentStep == 0) {
-        Position position = await _determinePosition();
-        print(commentCtrl.text);
-        print(widget.type);
-        print(position.latitude);
-        await eventService.addEvent(position, widget.type, commentCtrl.text.isEmpty ? "Sin descripción del evento." : commentCtrl.text);
-        setState(() => currentStep += 1);
-    } else if (currentStep == 1) {
-      final attachFilesConfirmed  = await eventService.attachFiles(image?.path, recordFilePath);
-      
-      if(attachFilesConfirmed) {
-        if(!mounted) return;
-        Navigator.pushNamed(context, 'home');
-        mensajeInfo(context, "Envío exitoso", "Evidencias enviadas correctamente.");
-      } else {
-        if(!mounted) return;
-          mensajeInfo(context, "Envío fallido", "No fue posible enviar las evidencias");
-      }
-    }
-  }
-
-  cancel() {
-    currentStep > 0 ? setState(() => currentStep -= 1) : null;
-  }
-
-  Future<String> getFilePath() async {
-    Directory storageDirectory = await getTemporaryDirectory();
-    String sdPath = "${storageDirectory.path}/record";
-    var d = Directory(sdPath);
-    if (!d.existsSync()) {
-      d.createSync(recursive: true);
-    }
-    prefs.audio++;
-    return "$sdPath/test_${prefs.audio}.mp3";
-  }
-
-  Future<bool> checkPermission() async {
-    if (!await Permission.microphone.isGranted) {
-      PermissionStatus status = await Permission.microphone.request();
-      if (status != PermissionStatus.granted) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  void startRecord() async {
-    bool hasPermission = await checkPermission();
-     if (hasPermission) {
-      statusText = "Recording...";
-      recordFilePath = await getFilePath();
-      isComplete = false;
-      isRecording = true;
-      RecordMp3.instance.start(recordFilePath!, (type) {
-        statusText = "Record error--->$type";
-        setState(() {});
-    });
-  } else {
-      if(!mounted) return;
-      mensajeInfo(context, "Error de permisos", "Es necesario autorizar los permisos de micrófono para grabar audio.");
-  }
-    setState(() {});
-  }
-
-  void pauseRecord() {
-    if (RecordMp3.instance.status == RecordStatus.PAUSE) {
-      bool s = RecordMp3.instance.resume();
-      if (s) {
-        statusText = "Recording...";
-        setState(() {});
-      }
-    } else {
-      bool s = RecordMp3.instance.pause();
-      if (s) {
-        statusText = "Recording pause...";
-        setState(() {});
-      }
-    }
-  }
-
-  void stopRecord() {
-    bool s = RecordMp3.instance.stop();
-    if (s) {
-      statusText = "Record complete";
-      isComplete = true;
-      isRecording = false;
-      setAudio();
-      setState(() {});
-    }
-  }
-
-  void resumeRecord() {
-    bool s = RecordMp3.instance.resume();
-    if (s) {
-      statusText = "Recording...";
-      setState(() {});
-    }
-  }
-
-  void initPlayer() {
-    audioPlayer.onPlayerStateChanged.listen((state) {
-      if (!mounted) return;
-      setState(() {
-        isPlaying = state == PlayerState.playing;
-      });
-    });
-
-    audioPlayer.onDurationChanged.listen((newDuration) {
-      if (!mounted) return;
-      setState(() {
-        duration = newDuration;
-      });
-    });
-
-    audioPlayer.onPositionChanged.listen((newPosition) {
-      if (!mounted) return;
-      setState(() {
-        position = newPosition;
-      });
-    });
-  }
-
-  String formatTime(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-
-    return [
-      if (duration.inHours > 0) hours,
-      minutes,
-      seconds,
-    ].join(':');
-  }
-
-  Future setAudio() async {
-    audioPlayer.setSourceDeviceFile(recordFilePath!);
-  }
-
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
+              BtnCasual(
+                  textobutton: "Enviar",
+                  onPressed: () async {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    final progress = ProgressHUD.of(context);
+                    progress!.show();
+                    Position position = await determinePosition();
+                    // progress.show();
+                    if(await eventService.addEvent(position, 10, widget.descCtrl.text)) {
+                      if(await eventService.attachFiles(image?.path, recordFilePath , video)) {
+                        if(!mounted) return;
+                        video = null;
+                        image = null;
+                        Navigator.pushNamed(context, 'home');
+                          mensajeInfo(context, "Envío exitoso",
+                              "Evidencias enviadas correctamente.");
+                      }
+                    } else {
+                      if(!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No fue posible el envío de evidencias, intenta de nuevo.'),
+                        ),
+                      );
+                    }
+                    
+                    Future.delayed(const Duration(seconds: 5), () {
+                      progress.dismiss();
+                    });
+                  },
+                  width: MediaQuery.of(context).size.width / 3,
+                  colorBtn: prefs.colorButton),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }
