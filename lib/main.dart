@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:panic_app/routes/routes.dart';
-import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/services/internet_service.dart';
+import 'native_services/button_volume_service.dart'; // boton de panico
 import 'utils/preferencias_app.dart';
 import 'package:camera/camera.dart';
 import 'package:panic_app/pages/camera_page.dart';
@@ -19,7 +19,7 @@ Future<void> main() async {
   await checkInternet();
   cameras = await availableCameras();
   if (prefs.button == true) {
-    activacion.startListening(null, null);
+    activacion.startListening();
   }
   runApp(const MyApp());
 }

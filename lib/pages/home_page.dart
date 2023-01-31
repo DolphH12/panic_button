@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:panic_app/services/background_service.dart';
+import 'package:panic_app/native_services/button_volume_service.dart';
+
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:url_launcher/url_launcher.dart';
@@ -262,18 +263,17 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               activeColor: _prefs.colorButton,
               value: _prefs.button,
               onChanged: (value) async {
-                //   _prefs.button = value;
-                //   if (value) {
+                  _prefs.button = value;
+                  if (value) {
                 //     await FlutterBackground.enableBackgroundExecution();
-                //     activacion.startListening(_speech, timer);
+                    activacion.startListening();
                 //     startTimer();
                 //     // if(!mounted) return;
                 //     // Navigator.pushReplacementNamed(context, 'home');
-                //   } else {
-                //     activacion.stopListening();
-                //     stopVoice();
-                //   }
-                //   setState(() {});
+                  } else {
+                    activacion.stopListening();
+                  }
+                  setState(() {});
               }),
           // onChanged: null),
           const Text(

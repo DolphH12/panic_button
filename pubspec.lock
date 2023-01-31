@@ -181,13 +181,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_android_volume_keydown:
-    dependency: "direct main"
-    description:
-      name: flutter_android_volume_keydown
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
   flutter_background:
     dependency: "direct main"
     description:

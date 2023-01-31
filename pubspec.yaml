@@ -35,7 +35,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  flutter_android_volume_keydown: ^1.0.0
   flutter_background: ^1.1.0
   flutter_colorpicker: ^1.0.3
   flutter_progress_hud: ^2.0.2
