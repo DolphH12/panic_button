@@ -16,8 +16,8 @@ class FlutterAndroidVolumeKeydown {
   static Stream<HardwareButton> stream = _channel
       .receiveBroadcastStream()
       .cast<bool>()
-      .map((event) =>
-          event ? HardwareButton.volume_down : HardwareButton.volume_up);
+      .map((event) => // Mapeo el canal para todos los eventos que se envien convertirlos en mi tipo de dato HardwateButton
+          event ?  HardwareButton.volume_up: HardwareButton.volume_down );
 }
 
 // tipologia con la que se va a trabajar, no es obligatoria, perfectamente podriamos hacerlo con true and false

@@ -6,6 +6,7 @@ import 'package:flutter_background/flutter_background.dart';
 import 'package:panic_app/routes/routes.dart';
 import 'package:panic_app/services/internet_service.dart';
 import 'native_services/button_volume_service.dart'; // boton de panico
+import 'native_services/notification_button_service.dart';
 import 'utils/preferencias_app.dart';
 import 'package:camera/camera.dart';
 import 'package:panic_app/pages/camera_page.dart';
@@ -21,6 +22,7 @@ Future<void> main() async {
   if (prefs.button == true) {
     activacion.startListening();
   }
+  await initNotifications();
   runApp(const MyApp());
 }
 

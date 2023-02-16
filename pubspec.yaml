@@ -53,6 +53,7 @@ dependencies:
   syncfusion_flutter_maps: ^20.3.56
   url_launcher: ^6.1.7
   video_player: ^2.5.1
+  flutter_local_notifications: ^12.0.3
 
 dev_dependencies:
   flutter_lints: ^2.0.0

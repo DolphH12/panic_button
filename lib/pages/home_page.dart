@@ -266,14 +266,17 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
                   _prefs.button = value;
                   if (value) {
                 //     await FlutterBackground.enableBackgroundExecution();
-                    activacion.startListening();
+                    await activacion.initializeButtonService();
+                    
                 //     startTimer();
                 //     // if(!mounted) return;
                 //     // Navigator.pushReplacementNamed(context, 'home');
                   } else {
-                    activacion.stopListening();
+                    await activacion.stopbuttonService();
                   }
+
                   setState(() {});
+                  
               }),
           // onChanged: null),
           const Text(
