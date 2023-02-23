@@ -21,7 +21,7 @@ class ConfigurationPage extends StatelessWidget {
         leadingWidth: 200,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Padding(
+          child:  Padding(
             padding: EdgeInsets.symmetric(horizontal: 15.0),
             child: Row(
               children: [

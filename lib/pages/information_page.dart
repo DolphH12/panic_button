@@ -36,7 +36,7 @@ class InformationPage extends StatelessWidget {
                 Navigator.pop(context)
               },
 
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
                 child: Row(
                   children: [
@@ -288,7 +288,7 @@ class EvidenciasEmergencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return  Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(

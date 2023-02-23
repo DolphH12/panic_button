@@ -268,7 +268,7 @@ class _IconLoading extends StatelessWidget {
             shape: BoxShape.circle,
             color: colorIndic,
           ),
-          child: const Column(
+          child:  Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(color: Colors.white,),
