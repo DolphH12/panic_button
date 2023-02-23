@@ -16,9 +16,10 @@ class _InformationPermissionPageState extends State<InformationPermissionPage> {
   @override
   Widget build(BuildContext context) {
 
+    final List<dynamic> infoCamera = ModalRoute.of(context)!.settings.arguments as List<dynamic>;
     final Size size = MediaQuery.of(context).size;
     final PreferenciasUsuario prefs = PreferenciasUsuario();
-    final ValueNotifier statusCamera = ValueNotifier(ModalRoute.of(context)!.settings.arguments);
+    final ValueNotifier statusCamera = ValueNotifier(infoCamera[0]);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +65,7 @@ class _InformationPermissionPageState extends State<InformationPermissionPage> {
                   onPressed: () async {
                     await checkPermission(prefs).then((hasGranted) {
                       if(hasGranted == PermissionStatus.granted){
-                        Navigator.pushReplacementNamed(context, 'camera');
+                        Navigator.pushReplacementNamed(context, 'camera', arguments: infoCamera[1]);
                       } else if (hasGranted == PermissionStatus.permanentlyDenied) {
                         statusCamera.value = 'Ir a configuración';
                       }
@@ -82,8 +83,6 @@ class _InformationPermissionPageState extends State<InformationPermissionPage> {
   Future<PermissionStatus> checkPermission(PreferenciasUsuario prefs) async {
     final PermissionStatus status = await Permission.camera.request();
     status.isPermanentlyDenied ? prefs.permissionDeniedCamera = true : prefs.permissionDeniedCamera = false;
-
-    print(prefs.permissionDeniedCamera);
     return status;
   }
 

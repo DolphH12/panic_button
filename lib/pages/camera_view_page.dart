@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:panic_app/widgets/camera_image_widget.dart';
 
@@ -59,7 +58,7 @@ class _CameraViewPageState extends State<CameraViewPage> {
         child: const Icon(Icons.done),
         onPressed: () { 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            image = File(infoImage[0]);
+            image.value = [File(infoImage[0]), infoImage[1]];
             // imageBool.value = true;
             Navigator.of(context).popUntil(ModalRoute.withName("information"));
           });// Navigator.pushNamedAndRemoveUntil(context, 'information', ModalRoute.withName('cameraPage'));
