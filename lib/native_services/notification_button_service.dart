@@ -43,8 +43,8 @@ Future<void> showNotificacion() async {
 
   await flutterLocalNotificationsPlugin.show(
       1,
-      'Panico',
-      'Se ha enviado la alerta de panico!s.',
+      'Pánico',
+      'Se ha enviado la alerta de pánico!',
       notificationDetails,
       payload: 'Default_Sound');
 }

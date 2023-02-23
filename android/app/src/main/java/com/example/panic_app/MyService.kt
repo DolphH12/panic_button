@@ -23,7 +23,7 @@ class MyService : Service() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             var builder : NotificationCompat.Builder = NotificationCompat.Builder(this , "messages" )
                     .setContentText("This is running in background")
-                    .setContentTitle("Flutter Background")
+                    .setContentTitle("Panic button Background")
                     .setSmallIcon(R.drawable.notification_message)
                     .setAutoCancel(true)
                     .setOngoing(false)
