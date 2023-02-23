@@ -1,18 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:panic_app/pages/video_view_info.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 
-  // import 'package:panic_app/widgets/btn_casual.dart';
+import '../pages/video_view_info.dart';
 
-final ValueNotifier imageBool = ValueNotifier(false);
-final ValueNotifier videoBool = ValueNotifier(false);
-File? image;
-String? video;
+String videoOld = "";
+final ValueNotifier<List<dynamic>> image = ValueNotifier<List<dynamic>>([]);
+final ValueNotifier<List<dynamic>> video  = ValueNotifier<List<dynamic>>(["",0.0]);
 
 class CameraImageWidget extends StatefulWidget {
   const CameraImageWidget({super.key});
@@ -22,74 +20,61 @@ class CameraImageWidget extends StatefulWidget {
 }
 
 class _CameraImageWidgetState extends State<CameraImageWidget> {
-  final ImagePicker _imagePicker = ImagePicker();
+  
+  final ImagePicker imagePicker = ImagePicker();
+  double mirror = 0.0;
 
   @override
   Widget build(BuildContext context) {
-    final PreferenciasUsuario prefs = PreferenciasUsuario();
-    List<dynamic> infoVideo = [];
+    
+    const BoxDecoration decorationContainer = BoxDecoration(
+      color: Color.fromARGB(15, 0, 0, 0),
+      borderRadius: BorderRadius.all(Radius.circular(25)),
+    );  
+
+    const Color colorExit = Color.fromARGB(70, 0, 0, 0);
 
     return Column(
       children: [
-        const SizedBox(
-          height: 10,
-        ),
+        
+        const SizedBox(height: 15,),
 
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(15)
-          ),
-          onPressed: () async {  
-            FocusScope.of(context).requestFocus(FocusNode());
-            
-            if(prefs.permissionDeniedCamera) {
-              Navigator.pushNamed(context, 'informationPermission', arguments: 'Ir a configuración');
-              return;
-            }
-            await permissionCamera().then((hasGranted) {
-              if(hasGranted == PermissionStatus.granted){
-                Navigator.pushNamed(context, 'camera');   
-              } else {
-                Navigator.pushNamed(context, 'informationPermission', arguments: 'Continuar');
-              } 
-            });
-          }, 
-
-          child: const Icon(Icons.camera_alt)
-        ),
-
-        const SizedBox(height: 15),
+        const ButtonCamera(cameraImage: true,),
+        const SizedBox(height: 5),
+        const ButtonCamera(cameraImage: false,),
+        // const SizedBox(height: 15),
 
         ValueListenableBuilder(
-          valueListenable: imageBool, 
+          valueListenable: image, 
           builder: (context, _, __) {
-          imageBool.value = false;
-          return image != null
+          
+          mirror = image.value.isNotEmpty ? image.value[1] == 0 ? 0 : math.pi : 0.0;
+
+          return image.value.isNotEmpty 
             ? AspectRatio(
               aspectRatio: 4/5,
               child: Container(
-                color:const Color.fromARGB(20, 0, 0, 0),
+                margin: const EdgeInsets.only(top: 15),
+                decoration: decorationContainer,
                 child: Stack(
                   children: [
-
                     Align(
                       alignment: Alignment.center,
-                      child: 
-                      Image.file(
-                        image!,
-                        fit: BoxFit.contain,
+                      child: Transform(
+                        transform: Matrix4.rotationY(mirror),
+                        alignment: Alignment.center,
+                        child: Image.file(image.value[0], fit: BoxFit.contain),
                       ),
                     ),
-            
+
                     Positioned(
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.black54, size: 30,),
-                        onPressed: () => setState(() {
-                          image = null;
-                        })
-                      )
-                    ),
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: colorExit, size: 30),
+                          onPressed: () => setState(() {
+                            image.value = [] ;
+                          })
+                        )
+                      ),
                   ]
                 ),
               ),
@@ -99,62 +84,85 @@ class _CameraImageWidgetState extends State<CameraImageWidget> {
         ),
 
         const SizedBox(height: 10),
-
-        ValueListenableBuilder(
-          valueListenable: videoBool, 
-          builder: (context, _, __) {
-          videoBool.value = false;
-          infoVideo = [];
-          infoVideo.addAll([video, 0]);
-          return video != null
-            ? AspectRatio(
-              aspectRatio: 4/5,
-              child: Container(
-                color: const Color.fromARGB(20, 0, 0, 0),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: VideoViewInfo(infoVideo: infoVideo)
+          ValueListenableBuilder(
+            valueListenable: video, 
+            builder: (context, _, __) {
+              
+                if(video.value[0] != "") {
+                  return VideoViewInfo(videoFile: video.value[0].toString());
+                } if (videoOld != "") {
+                  return AspectRatio(
+                    aspectRatio: 4/5,
+                    child: Container(
+                      decoration: decorationContainer,
+                      child: const Align(
+                        child: CircleAvatar(
+                          radius: 33,
+                          backgroundColor: Colors.black38,
+                          child: Icon(Icons.play_arrow, color: Colors.white, size: 50)
+                        ),
+                      ), 
                     ),
-
-                    Positioned(
-                      child: IconButton(
-                        icon: const Icon(Icons.close, color: Colors.black54, size: 30,),
-                        onPressed: () => setState(() {
-                          video = null;
-                        })
-                      )
-                    ),
-
-                  ]
-                ),
-              ),
-            )
-            : const SizedBox();
-          }
-        ),
-        
+                  );
+                } else {
+                  return const SizedBox();
+                }
+            }
+          )
       ],
     );
   }
+}
+
+class ButtonCamera extends StatelessWidget {
+  const ButtonCamera({
+    super.key, 
+    required this.cameraImage
+  });
+
+  final bool cameraImage;
   
-  // Future selectImage(option) async {
-  //   XFile? pickedFile;
-  //   if (option == 1) {
-  //     pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
-  //   } else {
-  //     pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-  //   }
-  //   setState(() {
-  //     if (pickedFile != null) {
-  //       image = File(pickedFile.path);
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text("Imagen no seleccionada")));
-  //     }
-  //   });
-  // }
+  @override
+  Widget build(BuildContext context) {
+    final PreferenciasUsuario prefs = PreferenciasUsuario();
+
+    return ElevatedButton(
+      style: raisedButtonStyle(context),
+      onPressed: () async {  
+        FocusScope.of(context).requestFocus(FocusNode());
+        if(prefs.permissionDeniedCamera) {
+          Navigator.pushNamed(context, 'informationPermission', arguments: ['Ir a configuración', cameraImage]);
+          return;
+        }
+
+        await permissionCamera().then((hasGranted) {
+          if(hasGranted == PermissionStatus.granted){
+            if(!cameraImage) {              
+              videoOld = video.value[0];
+              video.value = ["", video.value[1]];
+            }
+            Navigator.pushNamed(context, 'camera', arguments: cameraImage);   
+          } else {
+            Navigator.pushNamed(context, 'informationPermission', arguments: ['Continuar', cameraImage]);
+          } 
+        });
+      }, 
+
+      child: SizedBox(
+        width: 90,
+        height: 30,
+        child: Center(child: Text(cameraImage ? "Imagen" : "Video", style: const TextStyle(fontSize: 18))),
+      ),
+    );
+  }
+
+  ButtonStyle raisedButtonStyle(BuildContext context) =>
+    ElevatedButton.styleFrom(
+      backgroundColor: Theme.of(context).primaryColorDark,
+      foregroundColor: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+  );
 
   Future<PermissionStatus> permissionCamera() async{
     final status = await Permission.camera.status;

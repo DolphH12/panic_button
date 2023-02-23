@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+
 import 'package:geolocator/geolocator.dart';
 
-import 'package:panic_app/services/background_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
 import 'package:panic_app/widgets/audio_palyer_widget.dart';
@@ -12,13 +11,14 @@ import 'package:panic_app/widgets/camera_image_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
 import '../services/event_services.dart';
 
+
+
 class InformationPage extends StatelessWidget {
   const InformationPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final List args = ModalRoute.of(context)!.settings.arguments as List;
-    
 
     return ProgressHUD(
       backgroundColor: Theme.of(context).primaryColorDark,
@@ -31,21 +31,22 @@ class InformationPage extends StatelessWidget {
             leadingWidth: 100,
             leading: GestureDetector(
               onTap: ()  => {
-                image = null,
-                video = null,
+                image.value = [],
+                video.value = ["", 0.0],
                 Navigator.pop(context)
               },
 
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5.0),
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.arrow_back_ios_new),
                     Text("Regresar")
                   ],
                 ),
               ),
             ),
+
             centerTitle: true,
             title: Text(
               "Agrega información",
@@ -143,6 +144,7 @@ class TipoDeEventoInfo extends StatelessWidget {
           textController: controller,
           keyboardType: TextInputType.text,
           disabled: disabled,
+          maxChar: disabled ? 50 : 0,
         ),
       ],
     );
@@ -178,7 +180,7 @@ class _DescripcionEmergencyState extends State<DescripcionEmergency> {
               ),
               IconButton(
                   onPressed: () => mensajeInfo(context, "Información",
-                      "Puedes agregar informacion o grabar un audio para describir el evento."),
+                      "Puedes agregar información, escribiendo o grabar un audio describiendo el evento."),
                   icon: const Icon(Icons.info))
             ],
           ),
@@ -193,6 +195,7 @@ class _DescripcionEmergencyState extends State<DescripcionEmergency> {
                 placehoder: "Descripción",
                 textController: widget.controller,
                 keyboardType: TextInputType.text,
+                maxChar: 250,
               ),
             ),
             Flexible(
@@ -204,7 +207,26 @@ class _DescripcionEmergencyState extends State<DescripcionEmergency> {
             )
           ],
         ),
-        audio ? const AudioPlayerWidget() : const SizedBox()
+        audio ? Card(
+          elevation: 0,
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  IconButton(onPressed: () => setState(() => audio = !audio), icon: const Icon(Icons.delete,  color: Colors.black54, size: 27)),
+                  const SizedBox(width: 25),
+                  const Text(
+                  "*Graba un audio contando lo ocurrido",
+                  style: TextStyle(color: Colors.black54)),
+                ],
+              ),
+              const AudioPlayerWidget(),
+            ],
+          ),
+        ) 
+        
+        : const SizedBox()
       ],
     );
   }
@@ -237,7 +259,7 @@ class UbicacionEmergencia extends StatelessWidget {
               ),
               IconButton(
                   onPressed: () => mensajeInfo(context, "Información",
-                      "Puedes agregar informacion acerca del evento. Si tu ubicación es diferente a la del evento, escribela."),
+                      "Puedes agregar información acerca del evento. Si la ubicación del evento que deseas reportar es diferente a tu ubicación, puedes seleccionarla en el mapa o escribir la dirección en el campo correspondiente."),
                   icon: const Icon(Icons.info))
             ],
           ),
@@ -247,12 +269,14 @@ class UbicacionEmergencia extends StatelessWidget {
           placehoder: "Ubicación",
           textController: ubiController,
           keyboardType: TextInputType.text,
+          maxChar: 200,
         ),
         CustomInput(
           icon: Icons.add_location,
           placehoder: "Descripcion de la Ubicación",
           textController: descUbiController,
           keyboardType: TextInputType.text,
+          maxChar: 200,
         ),
       ],
     );
@@ -264,9 +288,9 @@ class EvidenciasEmergencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Padding(
           padding: EdgeInsets.only(left: 8.0),
           child: Text(
@@ -278,7 +302,11 @@ class EvidenciasEmergencia extends StatelessWidget {
           ),
         ),
         Center(
-          child: CameraImageWidget()
+          child: Column(
+            children: [
+              CameraImageWidget(),
+            ],
+          )
         )
       ],
     );
@@ -353,8 +381,9 @@ class _EnviarEmergenciaState extends State<EnviarEmergencia> {
                   textobutton: "Cancelar",
                   onPressed: () => {
                     FocusScope.of(context).requestFocus(FocusNode()),
-                    video = null,
-                    image = null,
+                    video.value = ["", 0.0],
+                    image.value = [],
+                    videoOld = "",
                     Navigator.pop(context)
                   },
 
@@ -369,16 +398,16 @@ class _EnviarEmergenciaState extends State<EnviarEmergencia> {
                     final progress = ProgressHUD.of(context);
                     progress!.show();
                     Position position = await determinePosition();
-                    // progress.show();
                     if(await eventService.addEvent(position, 10, widget.descCtrl.text)) {
-                      if(await eventService.attachFiles(image?.path, recordFilePath , video)) {
-                        if(!mounted) return;
-                        video = null;
-                        image = null;
-                        Navigator.pushNamed(context, 'home');
-                          mensajeInfo(context, "Envío exitoso",
-                              "Evidencias enviadas correctamente.");
-                      }
+                        if(await eventService.attachFiles(image.value, recordFilePath , video.value)) {
+                          if(!mounted) return;
+                          video.value = ["", 0.0];
+                          image.value = [];
+                          videoOld = "";
+                          Navigator.pushNamed(context, 'home');
+                            mensajeInfo(context, "Envío exitoso",
+                                "Evidencias enviadas correctamente.");
+                        }
                     } else {
                       if(!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(

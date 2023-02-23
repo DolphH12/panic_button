@@ -21,10 +21,10 @@ class ConfigurationPage extends StatelessWidget {
         leadingWidth: 200,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.0),
             child: Row(
-              children: const [
+              children: [
                 Icon(Icons.arrow_back_ios_new),
                 Text("Regresar")
               ],

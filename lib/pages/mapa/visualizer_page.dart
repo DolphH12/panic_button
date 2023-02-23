@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
@@ -16,6 +16,7 @@ import '../../models/map_event_model.dart';
 import '../../models/map_zone_model.dart';
 import '../../services/event_services.dart';
 import '../../widgets/cupertino_list_tile_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'event_detail_page.dart';
 
 
@@ -823,7 +824,7 @@ class _MainScreenState extends State<VisualizerPage> {
             margin: const EdgeInsets.only(top: 8),
             child: Column(
               children: [
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Zonas calientes",
                   color: Colors.transparent,
                   onPressed: () {
@@ -844,7 +845,7 @@ class _MainScreenState extends State<VisualizerPage> {
                     },
                   ),
                 ),
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Eventos",
                   color: Colors.transparent,
                   onPressed: () {
@@ -865,7 +866,7 @@ class _MainScreenState extends State<VisualizerPage> {
                     },
                   ),
                 ),
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Filtro de fecha",
                   color: Colors.transparent,
                   onPressed: () {
