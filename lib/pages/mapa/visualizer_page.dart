@@ -310,7 +310,7 @@ class _MainScreenState extends State<VisualizerPage> {
     if (showEvents) {
       int markersCount = 0;
       bool initMarker = true;
-      double distanceMarkers = 0.01;
+      double distanceMarkers = 0.001;
       bool agregar = false;
       
 
@@ -412,7 +412,7 @@ class _MainScreenState extends State<VisualizerPage> {
     });
 
     _zoomPanBehavior = MapZoomPanBehavior(
-        zoomLevel: 12,
+        zoomLevel: 17,
         minZoomLevel: 3,
         maxZoomLevel: 19,
         //focalLatLng: MapLatLng(_initLat,_initLong),
