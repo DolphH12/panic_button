@@ -8,6 +8,7 @@ package com.example.panic_app
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -19,6 +20,7 @@ import android.os.Build.VERSION_CODES
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -41,6 +43,7 @@ class MainActivity: FlutterActivity() {
 
 
 
+
     override fun configureFlutterEngine(@NonNull flutterEngine : FlutterEngine){
         super.configureFlutterEngine(flutterEngine)
 
@@ -52,7 +55,12 @@ class MainActivity: FlutterActivity() {
             val importance =  NotificationManager.IMPORTANCE_DEFAULT
             val CHANNEL_ID = "messages"
             val channel = NotificationChannel(CHANNEL_ID , name , importance)
+            if(VERSION.SDK_INT >= VERSION_CODES.Q){
+                channel.setAllowBubbles(true)
 
+            }
+            channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC;
+            channel.enableVibration(true)
 
             // Register the channel with the system
             val notificationManager : NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

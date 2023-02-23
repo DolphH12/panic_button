@@ -45,5 +45,6 @@ Future<void> showNotificacion() async {
       1,
       'Panico',
       'Se ha enviado la alerta de panico!s.',
-      notificationDetails);
+      notificationDetails,
+      payload: 'Default_Sound');
 }
