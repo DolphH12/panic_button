@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_background/flutter_background.dart';
+
 import 'package:geolocator/geolocator.dart';
-import 'package:panic_app/native_services/button_volume_service.dart';
-
-import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:url_launcher/url_launcher.dart';
 
+import 'package:panic_app/native_services/button_volume_service.dart';
+import 'package:panic_app/utils/preferencias_app.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/confirm.dart';
 import '../utils/utils.dart';
 import '../widgets/buttons_page.dart';
@@ -169,81 +167,14 @@ class SwicthBtnPanic extends StatefulWidget {
 class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
   final PreferenciasUsuario _prefs = PreferenciasUsuario();
 
-  var _speech = stt.SpeechToText();
-  String _text = "";
   Timer? timer;
   int seconds = 3;
-  // int confirm = 0;
   String text = "Start Service";
   Confirm confirm = Confirm();
-
-  void stopVoice() {
-    _text = "";
-    timer?.cancel();
-    _speech.stop();
-    setState(() {});
-  }
-
-  void startTimer() {
-    confirm.counter = 0;
-    _text = "";
-    timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => seconds--);
-      if (seconds == 0) {
-        _listen();
-        seconds = 3;
-      }
-    });
-  }
-
-  Future<void> emergenciaVoz() async {
-    print("hola");
-    Position position = await determinePosition();
-    final buttonemergency =
-        await eventService.addEvent(position, 1, "Evento externo, por voz");
-
-    print(buttonemergency);
-    if (buttonemergency == 'ok') {
-      if (!mounted) return;
-      mensajeInfo(
-          context, "Emergencia por voz", "Emergencia generada correctamente.");
-    }
-  }
-
-  void _listen() async {
-    bool available = await _speech.initialize(
-        onStatus: (value) async => {
-              print("onStatusR: $value"),
-              print("confirm en ${confirm.counter}"),
-              if ((value == "done" && confirm.counter == 2))
-                {emergenciaVoz(), print("Emergencia"), confirm.counter = 0}
-            },
-        onError: (value) => print("onStatusERROR: $value"));
-
-    if (available) {
-      _speech.listen(
-        onResult: (value) => setState(() {
-          _text = value.recognizedWords;
-          if ((_text.contains("ayuda") || _text.contains("Ayuda"))) {
-            confirm.counter++;
-            print(confirm.counter);
-
-            _text = "";
-            timer?.cancel();
-            _speech.stop();
-            _prefs.button = false;
-            activacion.stopListening();
-            setState(() {});
-          }
-        }),
-      );
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _speech = stt.SpeechToText();
   }
 
   @override
@@ -394,9 +325,10 @@ class FloatingCall extends StatefulWidget {
 }
 
 class _FloatingCallState extends State<FloatingCall>
-    with TickerProviderStateMixin {
+  with TickerProviderStateMixin {
   late AnimationController _controller;
   PreferenciasUsuario prefs = PreferenciasUsuario();
+  bool floatExtended = true;
 
   static const List<IconData> icons = [
     Icons.local_police,
@@ -407,7 +339,7 @@ class _FloatingCallState extends State<FloatingCall>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 100),
       vsync: this,
     );
   }
@@ -416,6 +348,7 @@ class _FloatingCallState extends State<FloatingCall>
   Widget build(BuildContext context) {
     Color backgroundColor = Colors.white;
     Color foregroundColor = prefs.colorButton;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(icons.length, (int index) {
@@ -456,10 +389,21 @@ class _FloatingCallState extends State<FloatingCall>
         return child;
       }).toList()
         ..add(
-          FloatingActionButton(
+          FloatingActionButton.extended(
+            label: const Text(
+              "Llamada de \nemergencia",
+              style: TextStyle(fontSize: 12),
+            ),
+            isExtended: floatExtended,
+            icon: Icon(
+              floatExtended == true ? Icons.call : Icons.close,
+              color: floatExtended == true ? Colors.white : Colors.red,
+            ),
             backgroundColor: foregroundColor,
-            child: const Icon(Icons.call),
             onPressed: () {
+              setState(() {
+                floatExtended = !floatExtended;
+              });
               if (_controller.isDismissed) {
                 _controller.forward();
               } else {

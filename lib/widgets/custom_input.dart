@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomInput extends StatefulWidget {
   final IconData icon;
@@ -7,6 +8,7 @@ class CustomInput extends StatefulWidget {
   final TextInputType keyboardType;
   final bool isPassword;
   final bool? disabled;
+  final int maxChar;
 
   const CustomInput(
       {Key? key,
@@ -14,6 +16,7 @@ class CustomInput extends StatefulWidget {
       required this.placehoder,
       required this.textController,
       required this.keyboardType,
+      this.maxChar = 0,
       this.isPassword = false,
       this.disabled})
       : super(key: key);
@@ -49,6 +52,8 @@ class _CustomInputState extends State<CustomInput> {
                 blurRadius: 5)
           ]),
       child: TextField(
+        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+        maxLength: widget.maxChar == 0 ? null : widget.maxChar,
         enabled: widget.disabled,
         controller: widget.textController,
         cursorColor: Theme.of(context).primaryColor,
@@ -56,6 +61,7 @@ class _CustomInputState extends State<CustomInput> {
         keyboardType: widget.keyboardType,
         obscureText: _passwordVisible,
         decoration: InputDecoration(
+            errorMaxLines: 5,
             prefixIcon: Icon(widget.icon),
             focusedBorder: InputBorder.none,
             border: InputBorder.none,

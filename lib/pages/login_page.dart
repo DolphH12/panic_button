@@ -6,7 +6,6 @@ import 'package:panic_app/utils/preferencias_app.dart';
 import '../utils/utils.dart';
 import '../widgets/btn_ppal.dart';
 import '../widgets/custom_input.dart';
-import '../widgets/labels.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);

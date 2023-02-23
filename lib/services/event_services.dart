@@ -39,7 +39,7 @@ class EventService {
     }
   }
 
-  Future<bool> attachFiles(String? image, String? audio, String? video) async {
+  Future<bool> attachFiles(List? image, String? audio, List? video) async {
     final username = _prefs.username;
 
     var headers = {
@@ -52,9 +52,9 @@ class EventService {
     print(video);
     print(image);
 
-    image == null ? null : request.files.add(await http.MultipartFile.fromPath('imagenes', image));
-    audio == null ? null : request.files.add(await http.MultipartFile.fromPath('audios', audio));
-    video == null ? null : request.files.add(await http.MultipartFile.fromPath('videos', video));
+    image!.isEmpty ? null : request.files.add(await http.MultipartFile.fromPath('imagenes', image[0].path));
+    audio == null  ? null : request.files.add(await http.MultipartFile.fromPath('audios', audio));
+    video![0] == "" ? null : request.files.add(await http.MultipartFile.fromPath('videos', video[0]));
 
     request.headers.addAll(headers);
 

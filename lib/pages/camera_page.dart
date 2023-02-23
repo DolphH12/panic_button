@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:panic_app/pages/video_view_page.dart';
+import 'package:panic_app/widgets/camera_image_widget.dart';
 
 late List<CameraDescription> cameras;
 
@@ -16,7 +17,7 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
-
+  
   late CameraController _cameraController;
   late Future<void> _initializeControllerFuture;
   late int cameraPos = 0;
@@ -46,10 +47,11 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     
-    final Size size        = MediaQuery.of(context).size;
-    const Color colorIndic = Color.fromARGB(74, 134, 134, 134);
-    const Color colorWhite = Colors.white;
-    final List<dynamic> infoVideo = [];
+    final bool cameraImage   = ModalRoute.of(context)!.settings.arguments as bool;
+    
+    final Size size          = MediaQuery.of(context).size;
+    const Color colorLoading = Color.fromARGB(74, 134, 134, 134);
+    const Color colorWhite   = Colors.white;
     
     return SafeArea(
       child: Scaffold(
@@ -66,7 +68,7 @@ class _CameraPageState extends State<CameraPage> {
                   );
                   
                 } else {
-                  return _IconLoading(size: size, colorIndic: colorIndic);
+                  return _IconLoading(size: size, colorIndic: colorLoading);
                 }
               }),
               
@@ -75,7 +77,10 @@ class _CameraPageState extends State<CameraPage> {
                 left: 10,
                 child: IconButton(
                   icon: const Icon(Icons.close, color: colorWhite, size: 30,),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => {
+                    video.value = [videoOld, video.value[1]],
+                    Navigator.pop(context)
+                  }
                 )
               ),
 
@@ -106,13 +111,12 @@ class _CameraPageState extends State<CameraPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           IconButton(
-                            icon: const Icon(
-                              Icons.filter,
-                              color : colorWhite,
-                              size  : 28,
-                            ),
+                            icon:  Icon(cameraImage ? Icons.filter : Icons.video_camera_back,color : colorWhite, size  : 28),
                             onPressed: () async {
-                              _selectGalery();
+                              // TODO implementar setGalleryVideo
+                              cameraImage ? _selectGalery() : ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                content: Text("Funcionalidad no disponible"),
+                              ));;
                             },
                           ),
 
@@ -121,10 +125,7 @@ class _CameraPageState extends State<CameraPage> {
                             builder: (context, _, __) {
                             return GestureDetector(
                               onLongPress: () async {
-
-                                 _cameraController.value.isInitialized ? flash 
-                                ? _cameraController.setFlashMode(FlashMode.torch) 
-                                : _cameraController.setFlashMode(FlashMode.off) : null;
+                                cameraImage ? null : _cameraController.value.isInitialized ? flash ? _cameraController.setFlashMode(FlashMode.torch) : _cameraController.setFlashMode(FlashMode.off) : null;
                                 await _cameraController.startVideoRecording();
                                 setState(() {
                                   isRecoring = true;
@@ -134,31 +135,24 @@ class _CameraPageState extends State<CameraPage> {
                               onLongPressUp: () async {
                                 _cameraController.setFlashMode(FlashMode.off);
                                 XFile videopath = await _cameraController.stopVideoRecording();
-                                 
-                                setState(() {
-                                  isRecoring = false;
-                                }
-                              );
+                                setState(() {isRecoring = false;});
                               
                               if (!mounted) return;
-                              infoVideo.addAll([videopath.path, cameraPos]);
                               Navigator.push(context, MaterialPageRoute(
-                                builder: (builder) => VideoViewPage(
-                                  infoVideo: infoVideo,
-                                    )
-                                  ),
-                                );
+                                builder: (builder) => VideoViewPage(infoVideo: [videopath.path, cameraPos, 0])));
                               },
 
                               onTap: () async {
+                                
                                 _cameraController.value.isInitialized ? flash 
                                 ? _cameraController.setFlashMode(FlashMode.always) 
                                 : _cameraController.setFlashMode(FlashMode.off) : null;
 
                                 if(!isRecoring) {
                                   _isTakePicture.value ? null 
-                                  : _cameraController.value.isInitialized ? 
-                                  takePhoto(context, cameraPos) : null;
+                                  : _cameraController.value.isInitialized 
+                                  ? cameraImage ? takePhoto(context, cameraPos) : null 
+                                  : null ;
                                 }
                               },
     
@@ -194,9 +188,9 @@ class _CameraPageState extends State<CameraPage> {
                         height: 5,
                       ),
 
-                      const Text(
-                        "Mantén presionado para video, toca para foto",
-                        style: TextStyle(
+                      Text(
+                        cameraImage  ? "Toca para tomar foto" : "Mantén presionado para video",
+                        style: const TextStyle(
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
@@ -214,12 +208,11 @@ class _CameraPageState extends State<CameraPage> {
 
   void takePhoto(BuildContext context, int cameraPos) async {
     _isTakePicture.value = true;
-   final image = await _cameraController.takePicture();
-   _isTakePicture.value = false;
-   final List<dynamic> infoImage = [image.path, cameraPos];
+    final image = await _cameraController.takePicture();
+    _isTakePicture.value = false;
 
     if (!mounted) return;
-    Navigator.pushNamed(context, 'cameraView', arguments: infoImage);
+    Navigator.pushNamed(context, 'cameraView', arguments: [image.path, cameraPos]);
   }
   
   void _selectGalery() async {
@@ -227,14 +220,29 @@ class _CameraPageState extends State<CameraPage> {
     final ImagePicker imagePicker = ImagePicker();
 
     pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
-    
     if(pickedFile != null) {
-      final List<dynamic> infoImage = [pickedFile.path, 0];
       if (!mounted) return;
-      Navigator.pushNamed(context, 'cameraView', arguments: infoImage);
+      Navigator.pushNamed(context, 'cameraView', arguments: [pickedFile.path, 0]);
     }
   }
+
+  void _selectVideo() async {
+   XFile? videoGallery;
+   final ImagePicker imagePicker = ImagePicker();
+
+   videoGallery = await imagePicker.pickVideo(source: ImageSource.gallery);
+
+   if(videoGallery != null) {
+      print(videoGallery);
+      if (!mounted) return;
+      // video.value = [videoGallery.path, 0.0];
+      Navigator.push(context, MaterialPageRoute(
+        builder: (builder) => VideoViewPage(infoVideo: [videoGallery!.path, 0.0, 0])));
+    }
 }
+}
+
+
 
 class _IconLoading extends StatelessWidget {
   const _IconLoading({
@@ -260,9 +268,9 @@ class _IconLoading extends StatelessWidget {
             shape: BoxShape.circle,
             color: colorIndic,
           ),
-          child: Column(
+          child:  Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(color: Colors.white,),
               SizedBox(height: 30,),
               Text('Esperando cámara...', style: TextStyle(color: Colors.white),)

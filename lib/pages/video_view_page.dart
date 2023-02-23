@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:panic_app/widgets/camera_image_widget.dart';
+
 
 class VideoViewPage extends StatefulWidget {
   const VideoViewPage({Key? key, required this.infoVideo}) : super(key: key);
@@ -22,9 +23,9 @@ class _VideoViewPageState extends State<VideoViewPage> {
   @override
   void initState() {
     super.initState();
-    print('holaaaaaaaa1 : ${widget.infoVideo[0]}');
-    video = widget.infoVideo[0];
-    _controller = VideoPlayerController.file(File(widget.infoVideo[0].toString()))
+
+    print(widget.infoVideo[0]);
+    _controller = VideoPlayerController.file(File(widget.infoVideo[0]))
       ..addListener(() => setState(() {}))
       ..initialize().then((_) {});
   }
@@ -110,10 +111,10 @@ class _VideoViewPageState extends State<VideoViewPage> {
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.done),
           onPressed: () {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              // videoBool.value = true;
+              
+              video.value = [widget.infoVideo[0], mirror];
               Navigator.of(context).popUntil(ModalRoute.withName("information"));
-            });
+      
           },
         ),
       ),

@@ -11,10 +11,12 @@ import '../../services/event_services.dart';
 
 class EventDetailPage extends StatefulWidget {
   final MapEvent eventData;
+  final int lengthList;
   
   const EventDetailPage({
     Key? key,
     required this.eventData,
+    required this.lengthList,
   }) : super(key: key);
   
   @override
@@ -23,13 +25,21 @@ class EventDetailPage extends StatefulWidget {
 }
 
 class _EventDetailPageState extends State<EventDetailPage> {
+
+  bool _isReady = false;
   
   late PageController _pageViewController;
   late MapTileLayerController _mapController;
 
   late MapZoomPanBehavior _zoomPanBehavior;
 
+  late List<MapEvent> _listedMapEvents;
+
   late List<MapEvent> _mapEvents;
+
+  late List<MapEvent> _mapEvent;
+
+  late int _lengList;
 
   final eventService = EventService();
 
@@ -38,9 +48,14 @@ class _EventDetailPageState extends State<EventDetailPage> {
   @override
   void initState() {
     super.initState();
-    _mapController = MapTileLayerController();
-    _mapEvents = <MapEvent>[];
+    fetchEvents();
+    
 
+    _mapController = MapTileLayerController();
+    _listedMapEvents = <MapEvent>[];
+    _mapEvents = <MapEvent>[];
+    _mapEvent = <MapEvent>[];
+    _lengList = widget.lengthList;
     _mapEvents.add(MapEvent(
         id: widget.eventData.id,
         date: widget.eventData.date,
@@ -55,8 +70,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
         kind: widget.eventData.kind, 
         phone: widget.eventData.phone, 
         icon: widget.eventData.icon,
-        type: widget.eventData.type      
+        type: widget.eventData.type,
+        more: widget.eventData.more,
+        list: widget.eventData.list     
         ));
+    
+
 
     _zoomPanBehavior = MapZoomPanBehavior(
         enablePanning: false,
@@ -71,15 +90,64 @@ class _EventDetailPageState extends State<EventDetailPage> {
             position: MapToolbarPosition.bottomRight));
 
     _pageViewController = PageController(initialPage: 0, viewportFraction: 0.8);
+    print("el indice es:");
+    print(_lengList);
+    print(_listedMapEvents);
   }
+
+
+  Future fetchEvents() async {
+    final events = await eventService.getEvents();
+    for (final event in events['data']) {
+      _mapEvent.add(MapEvent(
+          id: event['id'],
+          date: event['date'],
+          status: event['status'],
+          time: event['time'],
+          zoneCode: event['zone'],
+          latitude: event['location'][0],
+          longitude: event['location'][1],
+          description: "",
+          comment: event['comment'], 
+          direction: '', 
+          kind: 0, 
+          phone: '', 
+          icon: '',
+          type: event['typeEmergency'],
+          more: [],
+          list: []
+          ));
+    } 
+    
+    _listedMapEvents.addAll(_mapEvents);
+    print(_listedMapEvents);
+    print(widget.eventData.list);
+    print(_mapEvent);
+
+    if (widget.eventData.list.isNotEmpty){
+    for (String id in widget.eventData.list) {
+      for (MapEvent event in _mapEvent){
+        if (id == event.id){
+          _listedMapEvents.add(event);
+        } 
+      }
+    } }
+    _isReady = true;
+    setState(() {});
+    print(_isReady);
+  }
+
+
 
   @override
   void dispose() {
     _pageViewController.dispose();
     _mapController.dispose();
     _mapEvents.clear();
+    _listedMapEvents.clear();
     super.dispose();
   }
+
 
   Widget backButton(context) {
     return CupertinoButton(
@@ -90,8 +158,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
         child: const Icon(CupertinoIcons.back));
   }
 
+
   Widget propDetail({required String title, String? content}) {
-    print("IDDD ${widget.eventData.id}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,25 +228,26 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-  Widget eventDetail({required double gap}) {
+  Widget eventDetail({required double gap, required int index}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          propDetail(title: 'Tipo de evento:', content: '${widget.eventData.type}'),
+          
+          propDetail(title: 'Tipo de evento:', content: '${_listedMapEvents[index].type}'),
           SizedBox(height: gap),
           propDetail(
               title: 'Fecha:',
-              content: '${widget.eventData.date} ${widget.eventData.time}'),
+              content: '${_listedMapEvents[index].date} ${_listedMapEvents[index].time}'),
           SizedBox(height: gap),
           propDetail(
               title: 'Descripción:',
-              content: widget.eventData.description != ''
-                  ? widget.eventData.description
+              content: _listedMapEvents[index].description != ''
+                  ? _listedMapEvents[index].description
                   : 'Sin descripción'),
           SizedBox(height: gap),
-          propDetail(title: 'Comentario:', content: widget.eventData.comment),
+          propDetail(title: 'Comentario:', content: _listedMapEvents[index].comment),
           SizedBox(height: gap),
           propDetail(title: 'Ubicación:'),
           Container(
@@ -194,15 +263,15 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   zoomPanBehavior: _zoomPanBehavior,
                   controller: _mapController,
-                  initialMarkersCount: _mapEvents.length,
+                  initialMarkersCount: 1,
                   tooltipSettings: const MapTooltipSettings(
                     color: Colors.transparent,
                   ),
                   markerBuilder: (BuildContext context, int index) {
                     const double markerSize = 25;
                     return MapMarker(
-                      latitude: _mapEvents[index].latitude,
-                      longitude: _mapEvents[index].longitude,
+                      latitude: _listedMapEvents[index].latitude,
+                      longitude:_listedMapEvents[index].longitude,
                       alignment: Alignment.bottomCenter,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
@@ -225,59 +294,32 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-  Widget _showPhotos(List<dynamic> fotos, BuildContext context) {
-    for (var foto in fotos) {
-      //convert Base64 string to Uint8List
-      Uint8List image = const Base64Decoder().convert(foto);
 
-      return SizedBox(
-        width: 300,
-        height: 400,
-        child: FittedBox(
-          fit: BoxFit.fill,
-          child: Image.memory(
-            image,
-          ),
-        ),
-      );
-    }
-    return const Text("No hay fotos disponibles");
-  }
-  
+
+
   @override
   Widget build(BuildContext context) {
-    
-    final args =  (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
-
     return Scaffold(
-        body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                backButton(context),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Reporte",
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black),
-                      ),
-                      const SizedBox(
-                        height: 24,
-                      ),
-                      eventDetail(gap: 16),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                )
-              ],
-            )));
+      appBar: AppBar(
+        title: const Text("Reporte")
+        ),
+      body: ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: _lengList,
+      itemBuilder: (BuildContext context, int index) {
+        return _isReady ? eventDetail(gap: 30 ,index: index): const Center(
+              child: CircularProgressIndicator(),
+            );
+     }
+     )
+  );
   }
 }
+
+
+
+
+    
+    
+    //final args =  (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
+

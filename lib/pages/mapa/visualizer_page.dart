@@ -1,18 +1,22 @@
 import 'dart:convert';
+import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 import 'package:panic_app/utils/utils.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:geolocator_platform_interface/src/models/position.dart';
 import '../../models/map_event_model.dart';
 import '../../models/map_zone_model.dart';
 import '../../services/event_services.dart';
 import '../../widgets/cupertino_list_tile_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'event_detail_page.dart';
 
 
@@ -33,6 +37,7 @@ class _MainScreenState extends State<VisualizerPage> {
   bool showChangeMap = false;
   bool showEmergency = true;
   bool typeOfMap = true;
+  bool _isloading = false;
   DateTimeRange filterDateRange = DateTimeRange(
     start: DateTime(2022, 1, 1),
     end: DateTime(2022, 12, 31),
@@ -42,8 +47,10 @@ class _MainScreenState extends State<VisualizerPage> {
   late MapTileLayerController _mapController;
 
   late MapZoomPanBehavior _zoomPanBehavior;
+  late Position _position;
 
   late List<MapEvent> _mapEvents;
+  late List<MapEvent> _mapEvent;
   late List<MapEvent> _filteredEvents;
   late List<MapZone> _mapZones;
   late List<MapEvent> _mapEmergencys;
@@ -51,6 +58,9 @@ class _MainScreenState extends State<VisualizerPage> {
   late int _currentSelectedIndex;
   late int _previousSelectedIndex;
   late int _tappedMarkerIndex;
+  late double _initLat;
+  late double _initLong;
+  late MapLatLng _currentPosition;
 
   late double _cardHeight;
 
@@ -177,26 +187,11 @@ class _MainScreenState extends State<VisualizerPage> {
           kind: 0, 
           phone: '', 
           icon: '',
-          type: event['typeEmergency']
-          ));
-          _mapEvents.add(MapEvent(
-          id: event['id'],
-          date: event['date'],
-          status: event['status'],
-          time: event['time'],
-          zoneCode: event['zone'],
-          latitude: 6.272622, 
-          longitude: -75.608296,
-          description: "",
-          comment: 'evento fake', 
-          direction: '', 
-          kind: 0, 
-          phone: '', 
-          icon: '',
-          type: 12
+          type: event['typeEmergency'],
+          more: [],
+          list: []
           ));
     } 
-    print("cargando eventos");  
   }
 
   
@@ -235,39 +230,134 @@ class _MainScreenState extends State<VisualizerPage> {
       time: '', 
       zoneCode: 100, 
       icon: emergency['image'],
-      type: 1
+      type: 1,
+      more: [],
+      list: []
       )); 
       desplazar = desplazar + 0.01;    
     }
     desplazar = 0;
   }
 
+
+  
+
+  Future<Position> determinePosition() async {
+  Position position;
+  bool serviceEnabled;
+  LocationPermission permission;
+  MapLatLng location;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  position = await Geolocator.getCurrentPosition();
+  _initLat = position.latitude;
+  _initLong = position.longitude;
+  location = MapLatLng(_initLat, _initLong);
+  setState(() {
+      _currentPosition = location;
+    });
+  _isloading = true;
+  return await Geolocator.getCurrentPosition();
+  
+}
+
+  String tarjetDescription (MapEvent item){
+
+    if (item.comment.isEmpty && item.list.isEmpty){
+      print("sin descripcion");
+      return "Sin descripción";
+    } else if (item.list.isNotEmpty) {
+      print("mas de un evento");
+      return "Compilación de eventos";
+    } else {
+      return item.comment;
+    }
+  }
+
   void loadFilteredEvents() {
     _mapController.clearMarkers();
     _filteredEvents.clear();
-    print("Switching");
 
     if (showEvents) {
       int markersCount = 0;
+      bool initMarker = true;
+      double distanceMarkers = 0.01;
+      bool agregar = false;
+      
 
       for (MapEvent mapEvent in _mapEvents) {
-        final eventDate = DateTime.parse('${mapEvent.date} ${mapEvent.time}');
 
-          _filteredEvents.add(mapEvent);
-          _mapController.insertMarker(markersCount);
-          markersCount++;
+        //final eventDate = DateTime.parse('${mapEvent.date} ${mapEvent.time}');
+
+        if ( initMarker){
+            _filteredEvents.add(mapEvent);
+            _mapController.insertMarker(markersCount);
+            initMarker = false;
+
+        } else{
+
+        for (MapEvent filtEvent in _filteredEvents) {
+          double a = mapEvent.latitude - filtEvent.latitude;
+          double b = mapEvent.longitude - filtEvent.longitude;
+          double distancia = sqrt(pow(a,2) + pow(b,2));
+
+
+
+          if (distancia < distanceMarkers /*&& mapEvent.type == filtEvent.type*/){
+            filtEvent.list.add(mapEvent.id); 
+                    
+            agregar = false;
+            break;
+          } else{
+            agregar = true;
+          }          
+        }
+        if (agregar){
+            markersCount++;
+            _filteredEvents.add(mapEvent);
+            _mapController.insertMarker(_filteredEvents.length);            
+          }
+        } 
+
       }
-    } else {
-      print("disabled");
-    }
+    } 
+
 
     if (showEmergency){
       int totalMarkers = _filteredEvents.length;
       _filteredEvents.addAll(_mapEmergencys);      
       for (MapEvent map in _mapEmergencys){
         _mapController.insertMarker(totalMarkers);
-        totalMarkers++;
-        
+        totalMarkers++;        
       }
     }
     setState(() {});
@@ -307,6 +397,7 @@ class _MainScreenState extends State<VisualizerPage> {
     _canUpdateFocalLatLng = true;
     _mapController = MapTileLayerController();
     _mapEvents = <MapEvent>[];
+    _mapEvent = <MapEvent>[];
     _filteredEvents = <MapEvent>[];
     _mapZones = <MapZone>[];
     _mapEmergencys = <MapEvent>[];
@@ -316,14 +407,15 @@ class _MainScreenState extends State<VisualizerPage> {
       await fetchZones();
       await fetchEmergency();
       loadFilteredEvents();
+      await determinePosition();
 
     });
 
     _zoomPanBehavior = MapZoomPanBehavior(
         zoomLevel: 12,
         minZoomLevel: 3,
-        maxZoomLevel: 15,
-        focalLatLng: const MapLatLng(6.217, -75.567),
+        maxZoomLevel: 19,
+        //focalLatLng: MapLatLng(_initLat,_initLong),
         enableDoubleTapZooming: true,
         toolbarSettings: const MapToolbarSettings(direction: Axis.vertical));
 
@@ -341,6 +433,8 @@ class _MainScreenState extends State<VisualizerPage> {
     _filteredEvents.clear();
     super.dispose();
   }
+
+  
 
   Widget mapFilters() {
     final filterStartDate = filterDateRange.start;
@@ -440,7 +534,7 @@ class _MainScreenState extends State<VisualizerPage> {
 
   Widget mapEvents() {
     return Flexible(
-      child: Container(
+      child: _isloading ?Container(
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(0),
@@ -454,6 +548,7 @@ class _MainScreenState extends State<VisualizerPage> {
                         ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
                         : 'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                     zoomPanBehavior: _zoomPanBehavior,
+                    initialFocalLatLng: _currentPosition,
                     controller: _mapController,
                     //_filteredEvents = _filteredEvents.addAll(_mapEmergencys),
                     initialMarkersCount: _filteredEvents.length,
@@ -492,6 +587,7 @@ class _MainScreenState extends State<VisualizerPage> {
                                 MaterialPageRoute(
                                   builder: (context) => EventDetailPage(
                                       eventData: _filteredEvents[index],
+                                      lengthList: _filteredEvents[index].list.length+1
                                       ),
                                 ),
                               );
@@ -543,7 +639,19 @@ class _MainScreenState extends State<VisualizerPage> {
                                           children: [
                                             propDetail(title: 'Telefono :  ' , content: _filteredEvents[index].phone),
                                             const SizedBox(width: 20,),
-                                            const FloatingCall(),
+                                            FloatingActionButton(
+                                              heroTag: null,
+                                              backgroundColor: Colors.white,
+                                              child: const Icon(Icons.call, color: Colors.green),
+                                              onPressed: () async {
+                                                final call = Uri.parse('tel:${_filteredEvents[index].phone}');
+                                                if (await canLaunchUrl(call)) {
+                                                  launchUrl(call);
+                                                } else {
+                                                  throw 'Could not launch $call';
+                                                }                
+                                              },
+                                            ),
                                           ],
                                         ),
                                       ],
@@ -610,7 +718,7 @@ class _MainScreenState extends State<VisualizerPage> {
                               scale: index == _currentSelectedIndex ? 1 : 0.85,  //tamaño tarjeta dependiendo de seleccionado
                               child: Stack(
                                 children: <Widget>[
-                                  Container(
+                                  item.kind == 0 ? Container(
                                     padding: const EdgeInsets.all(10.0),    //margenes internas tarjeta
                                     decoration: BoxDecoration(
                                       color: Colors.white.withAlpha(190),
@@ -633,7 +741,7 @@ class _MainScreenState extends State<VisualizerPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: <Widget>[
-                                          Text(_filteredEvents[index].comment,
+                                          Text(tarjetDescription(item),
                                               maxLines: 2,        //maximo dos lineas de mensaje en la tarjeta
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
@@ -642,7 +750,7 @@ class _MainScreenState extends State<VisualizerPage> {
                                           const SizedBox(height: 4),
                                           Expanded(                   //Aqui se agrega la descripcion.
                                               child: Text(
-                                            item.description,       //descripcion.  
+                                                _filteredEvents[index].description,       //descripcion.  
                                             style:
                                                 const TextStyle(fontSize: 14),
                                             overflow: TextOverflow.ellipsis,
@@ -652,7 +760,7 @@ class _MainScreenState extends State<VisualizerPage> {
                                       )),
                                       // Adding Image for card.
                                     ]),
-                                  ),
+                                  ): const Center(),
                                   // Adding splash to card while tapping.
                                   Material(
                                     color: Colors.transparent,
@@ -680,9 +788,9 @@ class _MainScreenState extends State<VisualizerPage> {
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     EventDetailPage(
-                                                        eventData:
-                                                            _filteredEvents[
-                                                                index]),
+                                                        eventData: _filteredEvents[index],
+                                                        lengthList: _filteredEvents[index].list.length,
+                                                        ),
                                               ),
                                             );
                                           });
@@ -699,7 +807,9 @@ class _MainScreenState extends State<VisualizerPage> {
                     )
                   : const SizedBox(),
             ],
-          )),
+          )) : const Center(
+              child: CircularProgressIndicator(),
+            )
     );
   }
 
@@ -714,7 +824,7 @@ class _MainScreenState extends State<VisualizerPage> {
             margin: const EdgeInsets.only(top: 8),
             child: Column(
               children: [
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Zonas calientes",
                   color: Colors.transparent,
                   onPressed: () {
@@ -735,7 +845,7 @@ class _MainScreenState extends State<VisualizerPage> {
                     },
                   ),
                 ),
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Eventos",
                   color: Colors.transparent,
                   onPressed: () {
@@ -756,7 +866,7 @@ class _MainScreenState extends State<VisualizerPage> {
                     },
                   ),
                 ),
-                CupertinoListTile(
+                CupertinoListTileWidget(
                   text: "Filtro de fecha",
                   color: Colors.transparent,
                   onPressed: () {
@@ -820,7 +930,7 @@ class _MainScreenState extends State<VisualizerPage> {
           backgroundColor: Colors.white,
           centerTitle: true,
           title: Text(
-            "Visualizador 1",
+            "Visualizador",
             style: TextStyle(
               color: Theme.of(context).primaryColorDark,
               fontWeight: FontWeight.bold,
@@ -858,62 +968,4 @@ class _MainScreenState extends State<VisualizerPage> {
   }
 }
 
-class FloatingCall extends StatefulWidget {
-  const FloatingCall({super.key});
 
-  @override
-  State<FloatingCall> createState() => _FloatingCallState();
-}
-
-class _FloatingCallState extends State<FloatingCall>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  PreferenciasUsuario prefs = PreferenciasUsuario();
-
-  static const List<IconData> icons = [
-    Icons.local_police,
-    Icons.notification_important
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Color backgroundColor = Colors.white;
-    Color foregroundColor = prefs.colorButton;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          height: 60,
-          width: 50,
-          alignment: FractionalOffset.topCenter,
-          child: FloatingActionButton(
-              heroTag: null,
-              backgroundColor: backgroundColor,
-              child: Icon(Icons.call, color: foregroundColor),
-              onPressed: () async {
-                
-                  final call = Uri.parse('tel:${112}');
-                  if (await canLaunchUrl(call)) {
-                    launchUrl(call);
-                  } else {
-                    throw 'Could not launch $call';
-                  }
-                
-              },
-            ),
-          
-        )
-      ]
-    
-    );
-  }
-}

@@ -27,106 +27,103 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool isPlaying = false;
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
+  
+
   @override
   Widget build(BuildContext context) {
+    
     if (mounted) {
       initPlayer();
     }
-    return Card(
-      elevation: 0,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 15),
-          const Text(
-            "*Graba un audio contando lo ocurrido",
-            style: TextStyle(color: Colors.black54),
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [ 
+        
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColorDark,
+              elevation: 7),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Icon(
+              isRecording ? Icons.stop : Icons.mic,
+              size: 40,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColorDark,
-                elevation: 7),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 8),
-              child: Icon(
-                isRecording ? Icons.stop : Icons.mic,
-                size: 40,
-                color: Colors.white,
+          onPressed: () async {
+            if (isRecording) {
+              stopRecord();
+              position = const Duration(seconds: 0);
+              setState(() {});
+            } else {
+              boolButton = true;
+              startRecord();
+            }
+          },
+        ),
+        const SizedBox(height: 15),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: Theme.of(context).primaryColorDark,
+              child: IconButton(
+                onPressed: () async {
+                  if (isPlaying) {
+                    await audioPlayer.pause();
+                  } else if (boolButton) {
+                    await audioPlayer.resume();
+                  }
+                },
+                icon: Icon(
+                  isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                ),
+                iconSize: 25,
               ),
             ),
-            onPressed: () async {
-              if (isRecording) {
-                stopRecord();
-                position = const Duration(seconds: 0);
-                setState(() {});
-              } else {
-                boolButton = true;
-                startRecord();
-              }
-            },
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Theme.of(context).primaryColorDark,
-                child: IconButton(
-                  onPressed: () async {
-                    if (isPlaying) {
-                      await audioPlayer.pause();
-                    } else if (boolButton) {
+            SizedBox(
+              width: 300,
+              child: Column(
+                children: [
+                  Slider(
+                    thumbColor: Colors.black26,
+                    inactiveColor: Colors.black12,
+                    activeColor: Theme.of(context).primaryColor,
+                    min: 0,
+                    max: duration.inSeconds.toDouble(),
+                    value: position.inSeconds.toDouble(),
+                    onChanged: (value) async {
+                      position = Duration(seconds: value.toInt());
+                      await audioPlayer.seek(position);
                       await audioPlayer.resume();
-                    }
-                  },
-                  icon: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
+                    },
                   ),
-                  iconSize: 25,
-                ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        formatTime(position),
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      const Spacer(),
+                      Text(
+                        formatTime(duration),
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              SizedBox(
-                width: 200,
-                child: Column(
-                  children: [
-                    Slider(
-                      thumbColor: Colors.black26,
-                      inactiveColor: Colors.black12,
-                      activeColor: Theme.of(context).primaryColor,
-                      min: 0,
-                      max: duration.inSeconds.toDouble(),
-                      value: position.inSeconds.toDouble(),
-                      onChanged: (value) async {
-                        position = Duration(seconds: value.toInt());
-                        await audioPlayer.seek(position);
-                        await audioPlayer.resume();
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          formatTime(position),
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                        const Spacer(),
-                        Text(
-                          formatTime(duration),
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
+            )
+          ],
+        ),
+        const SizedBox(height: 30),
+      ],
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CupertinoListTile extends StatelessWidget {
+class CupertinoListTileWidget extends StatelessWidget {
   final String text;
   final IconData? icon;
   final Color? iconColor;
@@ -9,7 +9,7 @@ class CupertinoListTile extends StatelessWidget {
   final Widget? child;
   final VoidCallback onPressed;
 
-  const CupertinoListTile({
+  const CupertinoListTileWidget({
     Key? key,
     required this.text,
     required this.onPressed,

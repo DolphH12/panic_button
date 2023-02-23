@@ -13,6 +13,8 @@ class MapEvent {
   final int kind;
   final String icon;
   final int type;
+  final List more;
+  final List list;
 
 
   const MapEvent(
@@ -29,7 +31,10 @@ class MapEvent {
       required this.direction,
       required this.kind,
       required this.icon,
-      required this.type
+      required this.type,
+      required this.more,
+      required this.list
+
       });
       
 
