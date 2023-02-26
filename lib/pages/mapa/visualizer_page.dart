@@ -6,12 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:panic_app/utils/preferencias_app.dart';
-import 'package:panic_app/utils/utils.dart';
+
 import 'package:syncfusion_flutter_maps/maps.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:geolocator_platform_interface/src/models/position.dart';
 import '../../models/map_event_model.dart';
 import '../../models/map_zone_model.dart';
 import '../../services/event_services.dart';
@@ -30,11 +28,49 @@ class VisualizerPage extends StatefulWidget {
 class _MainScreenState extends State<VisualizerPage> {
   final eventService = EventService();
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          foregroundColor: Theme.of(context).primaryColorDark,
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0,
+          leadingWidth: 200,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Row(
+                children: const [
+                  Icon(Icons.arrow_back_ios_new),
+                  Text("Regresar")
+                ],
+              ),
+            ),
+          ),
+        ),
+      body: ProgressHUD(
+        backgroundRadius: const Radius.circular(100),
+        barrierColor: Colors.black26,
+        borderColor: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
+          child: SafeArea(
+            child: Column(
+              children: [mapEvents()],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   bool showZones = false;
   bool showEvents = true;
   bool showCards = true;
-  bool showDateFilter = false;
-  bool showChangeMap = false;
+  bool activateDateFilterButton = false;
+  bool showChangeMap = true;
   bool showEmergency = true;
   bool typeOfMap = true;
   bool _isloading = false;
@@ -47,10 +83,8 @@ class _MainScreenState extends State<VisualizerPage> {
   late MapTileLayerController _mapController;
 
   late MapZoomPanBehavior _zoomPanBehavior;
-  late Position _position;
 
   late List<MapEvent> _mapEvents;
-  late List<MapEvent> _mapEvent;
   late List<MapEvent> _filteredEvents;
   late List<MapZone> _mapZones;
   late List<MapEvent> _mapEmergencys;
@@ -58,8 +92,6 @@ class _MainScreenState extends State<VisualizerPage> {
   late int _currentSelectedIndex;
   late int _previousSelectedIndex;
   late int _tappedMarkerIndex;
-  late double _initLat;
-  late double _initLong;
   late MapLatLng _currentPosition;
 
   late double _cardHeight;
@@ -121,14 +153,14 @@ class _MainScreenState extends State<VisualizerPage> {
     return '${date.day} $month ${date.year} ';
   }
 
-  Widget getImage64(String image64,int index, double markerSize){
+  Widget getIconFromImage64(String image64,int index, double markerSize){
     Uint8List image = base64Decode(image64);
 
 
     if (image64 != ''){
       return SizedBox(
-        width: markerSize + 20,
-        height: markerSize + 20,
+        width: markerSize + 30,
+        height: markerSize + 30,
         child: FittedBox(
           fit: BoxFit.fill,
           child: Image.memory(
@@ -279,9 +311,7 @@ class _MainScreenState extends State<VisualizerPage> {
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
   position = await Geolocator.getCurrentPosition();
-  _initLat = position.latitude;
-  _initLong = position.longitude;
-  location = MapLatLng(_initLat, _initLong);
+  location = MapLatLng(position.latitude, position.longitude);
   setState(() {
       _currentPosition = location;
     });
@@ -293,10 +323,8 @@ class _MainScreenState extends State<VisualizerPage> {
   String tarjetDescription (MapEvent item){
 
     if (item.comment.isEmpty && item.list.isEmpty){
-      print("sin descripcion");
       return "Sin descripción";
     } else if (item.list.isNotEmpty) {
-      print("mas de un evento");
       return "Compilación de eventos";
     } else {
       return item.comment;
@@ -306,7 +334,6 @@ class _MainScreenState extends State<VisualizerPage> {
   void loadFilteredEvents() {
     _mapController.clearMarkers();
     _filteredEvents.clear();
-
     if (showEvents) {
       int markersCount = 0;
       bool initMarker = true;
@@ -344,7 +371,7 @@ class _MainScreenState extends State<VisualizerPage> {
         if (agregar){
             markersCount++;
             _filteredEvents.add(mapEvent);
-            _mapController.insertMarker(_filteredEvents.length);            
+            _mapController.insertMarker(_filteredEvents.length-1);            
           }
         } 
 
@@ -361,6 +388,8 @@ class _MainScreenState extends State<VisualizerPage> {
       }
     }
     setState(() {});
+
+    //List<MapCircle>.generate para generar todos los marcadores.
   }
 
   void _handlePageChange(int index) {
@@ -397,7 +426,6 @@ class _MainScreenState extends State<VisualizerPage> {
     _canUpdateFocalLatLng = true;
     _mapController = MapTileLayerController();
     _mapEvents = <MapEvent>[];
-    _mapEvent = <MapEvent>[];
     _filteredEvents = <MapEvent>[];
     _mapZones = <MapZone>[];
     _mapEmergencys = <MapEvent>[];
@@ -436,130 +464,238 @@ class _MainScreenState extends State<VisualizerPage> {
 
   
 
-  Widget mapFilters() {
-    final filterStartDate = filterDateRange.start;
-    final filterEndDate = filterDateRange.end;
-
+  Widget mapFiltersButton() {
     return Stack(
-      children: [
-        
-        showDateFilter ? Container(
-                width: MediaQuery.of(context).size.width / 1.75,
-                margin: const EdgeInsets.only(top: 15, left: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: PhysicalModel(
-                  borderRadius: BorderRadius.circular(100),
-                  color: Colors.white,
-                  elevation: 4,
-                  shadowColor: const Color(0x55000000),
-                  child: CupertinoButton(
-                    borderRadius: BorderRadius.circular(100),
-                    padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                    onPressed: () {
-                      pickDateRange();
-                    },
-                    child: IntrinsicHeight(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            CupertinoIcons.calendar_today,
-                            color: CupertinoColors.secondaryLabel,
-                            size: 18,
-                          ),
-                          Expanded(
-                            child: Text(
-                              getFormattedDate(filterStartDate),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: CupertinoColors.secondaryLabel),
-                            ),
-                          ),
-                          const VerticalDivider(),
-                          Expanded(
-                            child: Text(
-                              getFormattedDate(filterEndDate),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: CupertinoColors.secondaryLabel),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ))
-            : const SizedBox(),
-        showChangeMap ? Align(
-          alignment: Alignment.topRight,
-          child: Container(
-            margin: const EdgeInsets.only(right: 8, top: 128),
-            child: PhysicalModel(
-              borderRadius: BorderRadius.circular(100),
-              color: Colors.white,
-              elevation: 4,
-              shadowColor: const Color(0x99000000),
-              child: Tooltip(
-                message: "Map style",
-                child: MaterialButton(
-                  padding: EdgeInsets.zero,
-                  minWidth: 40,
-                  height: 40,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100)),
-                  child: const Icon(
-                    CupertinoIcons.map,
-                    size: 16,
-                    color: CupertinoColors.secondaryLabel,
-                  ),
-                  onPressed: () {
-                    
-                    setState(() { 
-                      typeOfMap = !typeOfMap;
-                    });
-                  },
-                ),
-              ),
-            ),
+      children: [               
+        Container(
+          margin: const EdgeInsets.only(top: 8, left: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(50),
           ),
-        ) : const SizedBox()
+          child: PhysicalModel(
+            borderRadius: BorderRadius.circular(100),
+            color: Colors.white,
+            elevation: 4,
+            shadowColor: const Color(0x55000000),
+            child: CupertinoButton(
+              borderRadius: BorderRadius.circular(100),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+              onPressed: () {
+                filtersDialog(context);
+              },
+              child: const SizedBox(
+                child: Text(
+                  "Filtros adicionales",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.secondaryLabel                    
+                  ),
+                ),                
+              )
+            ),
+          )
+        ),
       ],
     );
   }
 
-  Widget mapEvents() {
-    return Flexible(
-      child: _isloading ?Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(0),
+  void filtersDialog(BuildContext context) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+        return CupertinoAlertDialog(
+          title: 
+          Text('Filtros adicionales',
+            style: TextStyle( fontSize: 23, color: Theme.of(context).primaryColorDark
+              ),
+            ),          
+            content: Container(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+            child: Column(
+              children: [
+                CupertinoListTileWidget(
+                  text: "Zonas calientes",
+                  color: Colors.transparent,
+                  onPressed: () {
+                    setModalState(() {
+                      showZones = !showZones;
+                    });
+                    setState(() {});
+                  },
+                  child: CupertinoSwitch(
+                    value: showZones,
+                    thumbColor: CupertinoColors.white,
+                    trackColor: CupertinoColors.extraLightBackgroundGray,
+                    onChanged: (bool? value) {
+                      setModalState(() {
+                        showZones = value!;
+                      });
+                      setState(() {});
+                    },
+                  ),
+                ),
+                CupertinoListTileWidget(
+                  text: "Eventos",
+                  color: Colors.transparent,
+                  onPressed: () {
+                    setModalState(() {
+                      showEvents = !showEvents;
+                    });
+                    loadFilteredEvents();
+                  },
+                  child: CupertinoSwitch(
+                    value: showEvents,
+                    thumbColor: CupertinoColors.white,
+                    trackColor: CupertinoColors.extraLightBackgroundGray,
+                    onChanged: (bool? value) {
+                      setModalState(() {
+                        showEvents = value!;
+                      });
+                      loadFilteredEvents();
+                    },
+                  ),
+                ),
+                CupertinoListTileWidget(
+                  text: "Emergencias",
+                  color: Colors.transparent,
+                  onPressed: () {
+                    setModalState(() {
+                      showEmergency = !showEmergency;
+                    });
+                    loadFilteredEvents();
+                  },
+                  child: CupertinoSwitch(
+                    value: showEmergency,
+                    thumbColor: CupertinoColors.white,
+                    trackColor: CupertinoColors.extraLightBackgroundGray,
+                    onChanged: (bool? value) {
+                      setModalState(() {
+                        showEmergency = value!;
+                      });
+                      loadFilteredEvents();
+                    },
+                  ),
+                ),
+                CupertinoListTileWidget(
+                  text: "Filtro de fecha",
+                  color: Colors.transparent,
+                  onPressed: () {
+                    setModalState(() {
+                      activateDateFilterButton = !activateDateFilterButton;
+                    });
+                    setState(() {});
+                  },
+                  child: CupertinoSwitch(
+                    value: activateDateFilterButton,
+                    thumbColor: CupertinoColors.white,
+                    trackColor: CupertinoColors.extraLightBackgroundGray,
+                    onChanged: (bool? value) {
+                      setModalState(() {
+                        activateDateFilterButton = !activateDateFilterButton;
+                      });
+                      setState(() {});
+                    },
+                  ),
+                ),
+                activateDateFilterButton ? dateFilterButton() : const SizedBox()
+              ],
+            ),
           ),
-          child: Stack(
-            children: <Widget>[
-              SfMaps(
-                layers: <MapLayer>[
-                  MapTileLayer(
-                    urlTemplate: typeOfMap
-                        ? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-                        : 'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                    zoomPanBehavior: _zoomPanBehavior,
-                    initialFocalLatLng: _currentPosition,
-                    controller: _mapController,
-                    //_filteredEvents = _filteredEvents.addAll(_mapEmergencys),
-                    initialMarkersCount: _filteredEvents.length,
-                    tooltipSettings: const MapTooltipSettings(
-                      color: Colors.transparent,
-                    ),
-                    
-                    markerBuilder: (BuildContext context, int index) {   //cambio entre marcadores
-                      final double markerSize =
-                          _currentSelectedIndex == index ? 40 : 25;
-                      return MapMarker(
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Atrás',
+                style: TextStyle(color: Theme.of(context).primaryColorDark),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+    Widget dateFilterButton() {
+    final filterStartDate = filterDateRange.start;
+    final filterEndDate = filterDateRange.end;
+
+    return Container(           
+      width: MediaQuery.of(context).size.width / 1.75,
+      margin: const EdgeInsets.only(top: 15, left: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: PhysicalModel(
+        borderRadius: BorderRadius.circular(100),
+        color: Colors.white,
+        elevation: 4,
+        shadowColor: const Color(0x55000000),
+        child: CupertinoButton(
+          borderRadius: BorderRadius.circular(100),
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+          onPressed: () {
+            pickDateRange();
+          },
+          child: IntrinsicHeight(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  CupertinoIcons.calendar_today,
+                  color: CupertinoColors.secondaryLabel,
+                  size: 18,
+                ),
+                Expanded(
+                  child: Text(
+                    getFormattedDate(filterStartDate),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        color: CupertinoColors.secondaryLabel),
+                  ),
+                ),
+                const VerticalDivider(),
+                Expanded(
+                  child: Text(
+                    getFormattedDate(filterEndDate),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        color: CupertinoColors.secondaryLabel),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      )
+    );
+  }
+
+  Future pickDateRange() async {
+    DateTimeRange? newDateRange = await showDateRangePicker(
+      context: context,
+      initialDateRange: filterDateRange,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2030),
+    );
+
+    if (newDateRange == null) return;
+
+    setState(() {
+      filterDateRange = newDateRange;
+      loadFilteredEvents();
+    });
+  }
+
+  MapMarker drawMarkers(BuildContext context, int index){
+    final double markerSize = _currentSelectedIndex == index ? 40 : 25;
+    return MapMarker(
                         latitude: _filteredEvents[index].latitude,
                         longitude: _filteredEvents[index].longitude,
                         alignment: Alignment.bottomCenter,
@@ -627,7 +763,7 @@ class _MainScreenState extends State<VisualizerPage> {
 
                                         const SizedBox(height: 20),
                                         
-                                        getImage64(_filteredEvents[index].icon,index,100),
+                                        getIconFromImage64(_filteredEvents[index].icon,index,100),
                                         const SizedBox(height: 20),
                                         propDetail(title: 'Nombre :  ',content: _filteredEvents[index].id),
                                         const SizedBox(height: 22),
@@ -674,16 +810,16 @@ class _MainScreenState extends State<VisualizerPage> {
                             duration: const Duration(milliseconds: 250),
                             height: markerSize,
                             width: markerSize,
-                            child: getImage64(_filteredEvents[index].icon,index,markerSize)
+                            child: getIconFromImage64(_filteredEvents[index].icon,index,markerSize)
                             
                             
                           ),
                         ),
                       );
-                    },
-                    sublayers: showZones
-                        ? [
-                            MapCircleLayer(
+  }
+
+  MapSublayer drawZones() {
+    return MapCircleLayer(
                               circles: List<MapCircle>.generate(
                                 _mapZones.length,
                                 (int index) {
@@ -695,15 +831,13 @@ class _MainScreenState extends State<VisualizerPage> {
                                   );
                                 },
                               ).toSet(),
-                            ),
-                          ]
-                        : [],
-                  ),
-                ],
-              ),
-              mapFilters(),
-              showCards && showEvents         //TARJETAS
-                  ? Align(
+                            );
+  }
+
+
+  Widget drawTarjets() {
+    if(showCards && showEvents) {
+      return Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
                         height: _cardHeight,    //tamaño de la tarjeta
@@ -789,7 +923,7 @@ class _MainScreenState extends State<VisualizerPage> {
                                                 builder: (context) =>
                                                     EventDetailPage(
                                                         eventData: _filteredEvents[index],
-                                                        lengthList: _filteredEvents[index].list.length,
+                                                        lengthList: _filteredEvents[index].list.length+1,
                                                         ),
                                               ),
                                             );
@@ -804,166 +938,42 @@ class _MainScreenState extends State<VisualizerPage> {
                           },
                         ),
                       ),
-                    )
-                  : const SizedBox(),
+                    );
+    } else {
+      return widget;
+    }
+  }
+
+  Widget mapEvents() {
+    return Flexible(
+      child: _isloading ?Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          child: Stack(
+            children: <Widget>[
+              SfMaps(
+                layers: <MapLayer>[
+                  MapTileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    zoomPanBehavior: _zoomPanBehavior,
+                    initialFocalLatLng: _currentPosition,
+                    controller: _mapController,
+                    initialMarkersCount: _filteredEvents.length,
+                    tooltipSettings: const MapTooltipSettings(
+                      color: Colors.transparent),                    
+                    markerBuilder: (BuildContext context, int index) =>                    
+                      drawMarkers(context, index),                   
+                    sublayers: showZones ? [drawZones()] : [],
+                  ),],),
+              mapFiltersButton(),
+              drawTarjets()
             ],
-          )) : const Center(
+          )
+        ) : const Center(
               child: CircularProgressIndicator(),
-            )
-    );
-  }
-
-  void filtersDialog(BuildContext context) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext context) => StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-        return CupertinoAlertDialog(
-          title: const Text('Filtros adicionales'),
-          content: Container(
-            margin: const EdgeInsets.only(top: 8),
-            child: Column(
-              children: [
-                CupertinoListTileWidget(
-                  text: "Zonas calientes",
-                  color: Colors.transparent,
-                  onPressed: () {
-                    setModalState(() {
-                      showZones = !showZones;
-                    });
-                    setState(() {});
-                  },
-                  child: CupertinoSwitch(
-                    value: showZones,
-                    thumbColor: CupertinoColors.white,
-                    trackColor: CupertinoColors.extraLightBackgroundGray,
-                    onChanged: (bool? value) {
-                      setModalState(() {
-                        showZones = value!;
-                      });
-                      setState(() {});
-                    },
-                  ),
-                ),
-                CupertinoListTileWidget(
-                  text: "Eventos",
-                  color: Colors.transparent,
-                  onPressed: () {
-                    setModalState(() {
-                      showEvents = !showEvents;
-                    });
-                    loadFilteredEvents();
-                  },
-                  child: CupertinoSwitch(
-                    value: showEvents,
-                    thumbColor: CupertinoColors.white,
-                    trackColor: CupertinoColors.extraLightBackgroundGray,
-                    onChanged: (bool? value) {
-                      setModalState(() {
-                        showEvents = value!;
-                      });
-                      loadFilteredEvents();
-                    },
-                  ),
-                ),
-                CupertinoListTileWidget(
-                  text: "Filtro de fecha",
-                  color: Colors.transparent,
-                  onPressed: () {
-                    setModalState(() {
-                      showDateFilter = !showDateFilter;
-                    });
-                    setState(() {});
-                  },
-                  child: CupertinoSwitch(
-                    value: showDateFilter,
-                    thumbColor: CupertinoColors.white,
-                    trackColor: CupertinoColors.extraLightBackgroundGray,
-                    onChanged: (bool? value) {
-                      setModalState(() {
-                        showDateFilter = !showDateFilter;
-                      });
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: <CupertinoDialogAction>[
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Atrás',
-                style: TextStyle(color: CupertinoColors.link),
-              ),
-            ),
-          ],
-        );
-      }),
-    );
-  }
-
-  Future pickDateRange() async {
-    DateTimeRange? newDateRange = await showDateRangePicker(
-      context: context,
-      initialDateRange: filterDateRange,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2030),
-    );
-
-    if (newDateRange == null) return;
-
-    setState(() {
-      filterDateRange = newDateRange;
-      loadFilteredEvents();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          foregroundColor: Theme.of(context).primaryColorDark,
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: Text(
-            "Visualizador",
-            style: TextStyle(
-              color: Theme.of(context).primaryColorDark,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          elevation: 0,
-          leadingWidth: 200,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Row(
-                children: const [
-                  Icon(Icons.arrow_back_ios_new),
-                  Text("Regresar")
-                ],
-              ),
-            ),
-          ),
-        ),
-      body: ProgressHUD(
-        backgroundRadius: const Radius.circular(100),
-        barrierColor: Colors.black26,
-        borderColor: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 16),
-          child: SafeArea(
-            child: Column(
-              children: [mapEvents()],
-            ),
-          ),
-        ),
-      ),
+        )
     );
   }
 }

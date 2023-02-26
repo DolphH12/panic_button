@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -90,9 +87,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
             position: MapToolbarPosition.bottomRight));
 
     _pageViewController = PageController(initialPage: 0, viewportFraction: 0.8);
-    print("el indice es:");
-    print(_lengList);
-    print(_listedMapEvents);
   }
 
 
@@ -120,9 +114,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
     } 
     
     _listedMapEvents.addAll(_mapEvents);
-    print(_listedMapEvents);
-    print(widget.eventData.list);
-    print(_mapEvent);
 
     if (widget.eventData.list.isNotEmpty){
     for (String id in widget.eventData.list) {
@@ -134,7 +125,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
     } }
     _isReady = true;
     setState(() {});
-    print(_isReady);
   }
 
 
@@ -301,21 +291,33 @@ class _EventDetailPageState extends State<EventDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Reporte")
-        ),
+          foregroundColor: Theme.of(context).primaryColorDark,
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0,
+          leadingWidth: 200,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Row(
+                children: const [
+                  Icon(Icons.arrow_back_ios_new),
+                  Text("Regresar")
+                ],),),),),
       body: ListView.builder(
       padding: const EdgeInsets.all(8),
-      itemCount: _lengList,
+      itemCount: _lengList,      
       itemBuilder: (BuildContext context, int index) {
-        return _isReady ? eventDetail(gap: 30 ,index: index): const Center(
-              child: CircularProgressIndicator(),
-            );
-     }
-     )
-  );
-  }
-}
-
+        return _isReady ? 
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(width: 2)
+              ),),
+            child: eventDetail(gap: 30 ,index: index)): 
+            const Center(child: CircularProgressIndicator());
+     }));}}
 
 
 
