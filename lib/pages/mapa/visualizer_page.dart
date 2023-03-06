@@ -320,17 +320,6 @@ class _MainScreenState extends State<VisualizerPage> {
   
 }
 
-  String tarjetDescription(MapEvent item){
-
-    if (item.comment.isEmpty && item.list.isEmpty){
-      return "Sin descripción";
-    } else if (item.list.isNotEmpty) {
-      return "Compilación de eventos";
-    } else {
-      return item.comment;
-    }
-  }
-
   void loadFilteredEvents() {
     _mapController.clearMarkers();
     _filteredEvents.clear();
@@ -457,7 +446,7 @@ class _MainScreenState extends State<VisualizerPage> {
     _cardHeight = 80;
 
     _pageViewController = PageController(
-        initialPage: _currentSelectedIndex, viewportFraction: 0.8);
+        initialPage: _currentSelectedIndex);
   }
 
   @override
@@ -469,9 +458,154 @@ class _MainScreenState extends State<VisualizerPage> {
     super.dispose();
   }
 
-  
 
-  Widget mapFiltersButton() {
+
+
+
+
+  Flexible mapEvents() {
+    return Flexible(
+      child: _isloading ?Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          child: Stack(
+            children: <Widget>[
+              drawMap(),
+              drawTarjets(context),
+              mapFiltersButton()
+            ],
+          )
+        ) : const Center(
+              child: CircularProgressIndicator(),
+        )
+    );
+  }
+
+  SfMaps drawMap() {
+    return SfMaps(
+      layers: <MapLayer>[
+        MapTileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          zoomPanBehavior: _zoomPanBehavior,
+          initialFocalLatLng: _currentPosition,
+          controller: _mapController,
+          initialMarkersCount: _filteredEvents.length,
+          tooltipSettings: const MapTooltipSettings(
+            color: Colors.transparent),                    
+          markerBuilder: (BuildContext context, int index) {
+            final double markerSize = _currentSelectedIndex == index ? 40 : 25;
+            return MapMarker(
+              latitude: _filteredEvents[index].latitude,
+              longitude: _filteredEvents[index].longitude,
+              alignment: Alignment.bottomCenter,
+              child: GestureDetector(     //funcion al presionar un marcador
+                onTap: () {
+                  final progress = ProgressHUD.of(context);
+                  progress!.show();
+                  if (_currentSelectedIndex != index) {
+                    _canUpdateFocalLatLng = false;
+                    _tappedMarkerIndex = index;
+                    _pageViewController.animateToPage(   //se cambia la tarjeta de evento por la presionada
+                      index,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,);}
+                  if(_filteredEvents[index].kind == 0){                          
+                  Future.delayed(const Duration(seconds: 1), () { //ingresamos a los detalles de un evento o emergency
+                    progress.dismiss();                              
+                      Navigator.push(                                
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventDetailPage(                                  
+                            eventData: _filteredEvents[index],
+                            lengthList: _filteredEvents[index].list.length+1
+                            ),),);});
+                  }else {
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      progress.dismiss();
+                      emergengyDialog(index);});}},
+                child: AnimatedContainer(         //se redibuja el marcador cambiando color y tamaño 
+                  duration: const Duration(milliseconds: 250),
+                  height: markerSize,
+                  width: markerSize,
+                  child: getIconMarker(_filteredEvents[index].icon,index,markerSize)                          
+                ),),);},                 
+          sublayers: showZones ? [drawZones()] : [],
+        ),],);
+  }
+
+  Widget drawTarjets(BuildContext context) {
+    if(showCards && showEvents) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          height: _cardHeight,    //tamaño de la tarjeta
+          padding: const EdgeInsets.only(bottom: 8), //distancia de la parte inferior de la tarjeta
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: (){
+                  _pageViewController.animateToPage(
+                    _currentSelectedIndex+1, 
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut);
+                  },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.arrow_back_ios_new),
+                    ],
+                  ),
+                ),
+              ),                        
+              Expanded(
+                child: PageView.builder(
+                  itemCount: _filteredEvents.length - _mapEmergencys.length,      //numero de tarjetas a crear
+                  onPageChanged: _handlePageChange,
+                  controller: _pageViewController,
+                  itemBuilder: (BuildContext context, int index) {
+                    final MapEvent item = _filteredEvents[index];   //
+                    return Transform.scale(
+                        scale: index == _currentSelectedIndex ? 1 : 0.85,  //tamaño tarjeta dependiendo de seleccionado
+                        child: Stack(
+                          children: <Widget>[
+                           tarjetContent(item),                           // Adding splash to card while tapping.
+                            splashTarjet(index, context)
+                          ],
+                        ),
+                      );
+                  },
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  _pageViewController.animateToPage(
+                    _currentSelectedIndex-1, 
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.arrow_forward_ios_outlined),
+                    ],
+                  ),
+                ),
+              ),
+            ],                          
+          ),
+        ),
+      );
+      
+    } else {
+      return widget;
+    }
+  }
+
+  Stack mapFiltersButton() {
     return Stack(
       children: [               
         Container(
@@ -507,6 +641,37 @@ class _MainScreenState extends State<VisualizerPage> {
       ],
     );
   }
+
+
+  MapSublayer drawZones() {
+    return MapCircleLayer(
+        circles: List<MapCircle>.generate(
+          _mapZones.length,
+          (int index) {
+            return MapCircle(
+              center: _mapZones[index].center,
+              radius: getZoneRadius(_mapZones[index]),
+              color: getZoneColor(_mapZones[index]),
+              strokeColor: _mapZones[index].color,
+            );
+          },
+        ).toSet(),
+      );
+  }
+
+
+    String tarjetDescription(MapEvent item){
+
+    if (item.comment.isEmpty && item.list.isEmpty){
+      return "Sin descripción";
+    } else if (item.list.isNotEmpty) {
+      return "Compilación de eventos";
+    } else {
+      return item.comment;
+    }
+  }  
+
+  
 
   void filtersDialog(BuildContext context) {
     showCupertinoModalPopup<void>(
@@ -593,6 +758,8 @@ class _MainScreenState extends State<VisualizerPage> {
                     setModalState(() {
                       activateDateFilterButton = !activateDateFilterButton;
                     });
+                    setState(() {
+                      });
                   },
                   child: CupertinoSwitch(
                     value: activateDateFilterButton,
@@ -606,6 +773,7 @@ class _MainScreenState extends State<VisualizerPage> {
                           end: DateTime(2023, 12, 31),
                         );
                       });
+                      loadFilteredEvents();
                     },
                   ),
                 ),
@@ -629,7 +797,7 @@ class _MainScreenState extends State<VisualizerPage> {
     );
   }
 
-    Widget dateFilterButton() {
+    Container dateFilterButton() {
     final filterStartDate = filterDateRange.start;
     final filterEndDate = filterDateRange.end;
 
@@ -701,107 +869,9 @@ class _MainScreenState extends State<VisualizerPage> {
       filterDateRange = newDateRange;
       loadFilteredEvents();
     });
-  }
+  }  
 
-  MapMarker drawMarkers(BuildContext context, int index){
-    final double markerSize = _currentSelectedIndex == index ? 40 : 25;
-    return MapMarker(
-      latitude: _filteredEvents[index].latitude,
-      longitude: _filteredEvents[index].longitude,
-      alignment: Alignment.bottomCenter,
-      child: GestureDetector(     //funcion al presionar un marcador
-        onTap: () {
-          final progress = ProgressHUD.of(context);
-          progress!.show();
-          if (_currentSelectedIndex != index) {
-            _canUpdateFocalLatLng = false;
-            _tappedMarkerIndex = index;
-            _pageViewController.animateToPage(   //se cambia la tarjeta de evento por la presionada
-              index,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,);}
-          if(_filteredEvents[index].kind == 0){                          
-          Future.delayed(const Duration(seconds: 1), () { //ingresamos a los detalles de un evento o emergency
-            progress.dismiss();                              
-              Navigator.push(                                
-              context,
-              MaterialPageRoute(
-                builder: (context) => EventDetailPage(
-                    eventData: _filteredEvents[index],
-                    lengthList: _filteredEvents[index].list.length+1
-                    ),),);});
-          }else {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              progress.dismiss();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog( 
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),                                                                       
-                  content: emergencyDetails(index),
-                  actions: [ 
-                    ElevatedButton(onPressed: (){
-                    Navigator.pop(context);}, 
-                    child: const Text('Cerrar')),                                           
-                  ]);});});}},
-        child: AnimatedContainer(         //se redibuja el marcador cambiando color y tamaño 
-          duration: const Duration(milliseconds: 250),
-          height: markerSize,
-          width: markerSize,
-          child: getIconMarker(_filteredEvents[index].icon,index,markerSize)                          
-        ),),);
-  }
-
-  MapSublayer drawZones() {
-    return MapCircleLayer(
-        circles: List<MapCircle>.generate(
-          _mapZones.length,
-          (int index) {
-            return MapCircle(
-              center: _mapZones[index].center,
-              radius: getZoneRadius(_mapZones[index]),
-              color: getZoneColor(_mapZones[index]),
-              strokeColor: _mapZones[index].color,
-            );
-          },
-        ).toSet(),
-      );
-  }
-
-
-  Widget drawTarjets(BuildContext context) {
-    if(showCards && showEvents) {
-      return Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          height: _cardHeight,    //tamaño de la tarjeta
-          padding: const EdgeInsets.only(bottom: 8), //distancia de la parte inferior de la tarjeta
-          child: PageView.builder(
-            itemCount: _filteredEvents.length,      //numero de tarjetas a crear
-            onPageChanged: _handlePageChange,
-            controller: _pageViewController,
-            itemBuilder: (BuildContext context, int index) {
-              final MapEvent item = _filteredEvents[index];   //
-              return Transform.scale(
-                scale: index == _currentSelectedIndex ? 1 : 0.85,  //tamaño tarjeta dependiendo de seleccionado
-                child: Stack(
-                  children: <Widget>[
-                    tarjetContent(item),                           // Adding splash to card while tapping.
-                    splashTarjet(index, context)
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    } else {
-      return widget;
-    }
-  }
-
-  Widget emergencyDetails(int index) {
+  Column emergencyDetails(int index) {
     return Column(
       mainAxisSize: MainAxisSize.min,                                      
       children: [
@@ -855,7 +925,7 @@ class _MainScreenState extends State<VisualizerPage> {
     );
   }
 
-  Widget actualPosition(){
+  Align actualPosition(){
     return Align(
       alignment: Alignment.topRight,
       child: Container(
@@ -889,7 +959,7 @@ class _MainScreenState extends State<VisualizerPage> {
     );
   }
 
-  Widget tarjetContent(MapEvent item) {
+  Container tarjetContent(MapEvent item) {
     return Container(
       padding: const EdgeInsets.all(10.0),    //margenes internas tarjeta
       decoration: BoxDecoration(
@@ -933,7 +1003,7 @@ class _MainScreenState extends State<VisualizerPage> {
     );
   }
 
-  Widget splashTarjet(int index, BuildContext context) {
+  Material splashTarjet(int index, BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1037,96 +1107,9 @@ class _MainScreenState extends State<VisualizerPage> {
     ]);});
   }
 
-  Widget mapEvents() {
-    return Flexible(
-      child: _isloading ?Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          child: Stack(
-            children: <Widget>[
-              SfMaps(
-                layers: <MapLayer>[
-                  MapTileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    zoomPanBehavior: _zoomPanBehavior,
-                    initialFocalLatLng: _currentPosition,
-                    controller: _mapController,
-                    initialMarkersCount: _filteredEvents.length,
-                    tooltipSettings: const MapTooltipSettings(
-                      color: Colors.transparent),                    
-                    markerBuilder: (BuildContext context, int index) {
-                      final double markerSize = _currentSelectedIndex == index ? 40 : 25;
-                      return MapMarker(
-                        latitude: _filteredEvents[index].latitude,
-                        longitude: _filteredEvents[index].longitude,
-                        alignment: Alignment.bottomCenter,
-                        child: GestureDetector(     //funcion al presionar un marcador
-                          onTap: () {
-                            final progress = ProgressHUD.of(context);
-                            progress!.show();
-                            if (_currentSelectedIndex != index) {
-                              _canUpdateFocalLatLng = false;
-                              _tappedMarkerIndex = index;
-                              _pageViewController.animateToPage(   //se cambia la tarjeta de evento por la presionada
-                                index,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeInOut,);}
-                            if(_filteredEvents[index].kind == 0){                          
-                            Future.delayed(const Duration(seconds: 1), () { //ingresamos a los detalles de un evento o emergency
-                              progress.dismiss();                              
-                                Navigator.push(                                
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EventDetailPage(                                  
-                                      eventData: _filteredEvents[index],
-                                      lengthList: _filteredEvents[index].list.length+1
-                                      ),),);});
-                            }else {
-                              Future.delayed(const Duration(milliseconds: 100), () {
-                                progress.dismiss();
-                                emergengyDialog(index);});}},
-                          child: AnimatedContainer(         //se redibuja el marcador cambiando color y tamaño 
-                            duration: const Duration(milliseconds: 250),
-                            height: markerSize,
-                            width: markerSize,
-                            child: getIconMarker(_filteredEvents[index].icon,index,markerSize)                          
-                          ),),);},                 
-                    sublayers: showZones ? [drawZones()] : [],
-                  ),],),
-              showCards && showEvents ? Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: _cardHeight,    //tamaño de la tarjeta
-                        padding: const EdgeInsets.only(bottom: 8), //distancia de la parte inferior de la tarjeta
-                        child: PageView.builder(
-                          itemCount: _filteredEvents.length - _mapEmergencys.length,      //numero de tarjetas a crear
-                          onPageChanged: _handlePageChange,
-                          controller: _pageViewController,
-                          itemBuilder: (BuildContext context, int index) {
-                            final MapEvent item = _filteredEvents[index];   //
-                            return Transform.scale(
-                              scale: index == _currentSelectedIndex ? 1 : 0.85,  //tamaño tarjeta dependiendo de seleccionado
-                              child: Stack(
-                                children: <Widget>[
-                                  tarjetContent(item),                           // Adding splash to card while tapping.
-                                  splashTarjet(index, context)
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ) : widget,
-              mapFiltersButton()
-            ],
-          )
-        ) : const Center(
-              child: CircularProgressIndicator(),
-        )
-    );
-  }
+
+
+  
 }
 
 
