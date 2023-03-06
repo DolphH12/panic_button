@@ -1,15 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:geolocator/geolocator.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 import 'package:panic_app/native_services/button_volume_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../utils/confirm.dart';
-import '../utils/utils.dart';
 import '../widgets/buttons_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -194,20 +190,19 @@ class _SwicthBtnPanicState extends State<SwicthBtnPanic> {
               activeColor: _prefs.colorButton,
               value: _prefs.button,
               onChanged: (value) async {
-                  _prefs.button = value;
-                  if (value) {
-                //     await FlutterBackground.enableBackgroundExecution();
-                    await activacion.initializeButtonService();
-                    
-                //     startTimer();
-                //     // if(!mounted) return;
-                //     // Navigator.pushReplacementNamed(context, 'home');
-                  } else {
-                    await activacion.stopbuttonService();
-                  }
+                _prefs.button = value;
+                if (value) {
+                  //     await FlutterBackground.enableBackgroundExecution();
+                  await activacion.initializeButtonService();
 
-                  setState(() {});
-                  
+                  //     startTimer();
+                  //     // if(!mounted) return;
+                  //     // Navigator.pushReplacementNamed(context, 'home');
+                } else {
+                  await activacion.stopbuttonService();
+                }
+
+                setState(() {});
               }),
           // onChanged: null),
           const Text(
@@ -325,7 +320,7 @@ class FloatingCall extends StatefulWidget {
 }
 
 class _FloatingCallState extends State<FloatingCall>
-  with TickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   PreferenciasUsuario prefs = PreferenciasUsuario();
   bool floatExtended = true;
@@ -348,41 +343,49 @@ class _FloatingCallState extends State<FloatingCall>
   Widget build(BuildContext context) {
     Color backgroundColor = Colors.white;
     Color foregroundColor = prefs.colorButton;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: List.generate(icons.length, (int index) {
-        Widget child = Container(
-          height: 60.0,
-          width: 50.0,
-          alignment: FractionalOffset.topCenter,
-          child: ScaleTransition(
-            scale: CurvedAnimation(
-              parent: _controller,
-              curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
-                  curve: Curves.easeOut),
-            ),
-            child: FloatingActionButton(
-              heroTag: null,
-              backgroundColor: backgroundColor,
-              child: Icon(icons[index], color: foregroundColor),
-              onPressed: () async {
-                if (index == 0) {
-                  final call = Uri.parse('tel:123');
-                  if (await canLaunchUrl(call)) {
-                    launchUrl(call);
+        Widget child = Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            height: 50.0,
+            //width: 50.0,
+            //alignment: FractionalOffset.centerLeft,
+            child: ScaleTransition(
+              scale: CurvedAnimation(
+                parent: _controller,
+                curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
+                    curve: Curves.easeOut),
+              ),
+              child: FloatingActionButton.extended(
+                heroTag: null,
+                backgroundColor: backgroundColor,
+                icon: Icon(icons[index], color: foregroundColor),
+                label: Text(
+                  index == 0 ? "Policia" : "Bomberos",
+                  style: TextStyle(fontSize: 12, color: prefs.colorButton),
+                ),
+                onPressed: () async {
+                  if (index == 0) {
+                    const call = '123';
+                    try {
+                      FlutterPhoneDirectCaller.callNumber(call);
+                    } catch (e) {
+                      throw 'Could not launch $call';
+                    }
                   } else {
-                    throw 'Could not launch $call';
+                    const call = '119';
+                    try {
+                      FlutterPhoneDirectCaller.callNumber(call);
+                    } catch (e) {
+                      throw 'Could not launch $call';
+                    }
                   }
-                } else {
-                  final call = Uri.parse('tel:119');
-                  if (await canLaunchUrl(call)) {
-                    launchUrl(call);
-                  } else {
-                    throw 'Could not launch $call';
-                  }
-                }
-              },
+                },
+              ),
             ),
           ),
         );

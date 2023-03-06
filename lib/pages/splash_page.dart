@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:panic_app/bloc/bloc_emergency_list.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
 
@@ -17,12 +18,14 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     final prefs = PreferenciasUsuario();
+    EmergencyListBloc emergencyListBloc = EmergencyListBloc();
     if (prefs.refreshToken.isNotEmpty) {
       final ok = access(prefs.refreshToken);
 
       Timer(const Duration(seconds: 5), () async {
         if (await check()) {
           if (await ok) {
+            emergencyListBloc.getEmergencyList();
             if (!mounted) return;
             Navigator.pushReplacementNamed(context, 'home');
           } else {
@@ -35,7 +38,7 @@ class _SplashPageState extends State<SplashPage> {
       });
     } else {
       Timer(const Duration(seconds: 3),
-        () => Navigator.pushReplacementNamed(context, 'login'));
+          () => Navigator.pushReplacementNamed(context, 'login'));
     }
   }
 

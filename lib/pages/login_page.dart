@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:panic_app/services/user_service.dart';
 import 'package:panic_app/utils/preferencias_app.dart';
+import '../bloc/bloc_emergency_list.dart';
 import '../utils/utils.dart';
 import '../widgets/btn_ppal.dart';
 import '../widgets/custom_input.dart';
@@ -75,8 +76,6 @@ class _LoginPageState extends State<LoginPage> {
         false; //if showDialouge had returned null, then return false
   }
 
-  
-
   Widget _tituloPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -118,8 +117,7 @@ class __FormState extends State<_Form> {
   UsuarioService usuarioService = UsuarioService();
   PreferenciasUsuario prefs = PreferenciasUsuario();
 
-
-   Widget _labelLogin() {
+  Widget _labelLogin() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -146,7 +144,6 @@ class __FormState extends State<_Form> {
       ],
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -191,8 +188,10 @@ class __FormState extends State<_Form> {
 
   void _onSubmit(BuildContext context) async {
     Map info = {};
+    EmergencyListBloc emergencyListBloc = EmergencyListBloc();
     info = await usuarioService.login(userCtrl.text, passCtrl.text);
     if (info['ok']) {
+      emergencyListBloc.getEmergencyList();
       final seen = prefs.firstTime;
       Future.delayed(const Duration(seconds: 5), () {
         // Navigator.pushReplacementNamed(context, 'intro');

@@ -16,8 +16,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = PreferenciasUsuario();
-  await prefs.initPrefs();  
-  await checkInternet();
+  await prefs.initPrefs();
+  //await checkInternet();
   cameras = await availableCameras();
   if (prefs.button == true) {
     activacion.startListening();
@@ -32,7 +32,7 @@ const androidConfig = FlutterBackgroundAndroidConfig(
       "Background notification for keeping the example app running in the background",
   notificationImportance: AndroidNotificationImportance.Default,
   notificationIcon: AndroidResource(
-      name: 'background_icon',  
+      name: 'background_icon',
       defType: 'drawable'), // Default is ic_launcher from folder mipmap
 );
 

@@ -13,7 +13,7 @@ class EmergencyListBloc {
   EmergencyListBloc._internal();
 
   StreamController<List<ListEventModel>> controllerList =
-      StreamController<List<ListEventModel>>();
+      StreamController<List<ListEventModel>>.broadcast();
 
   List<ListEventModel> listEvents = [];
 
