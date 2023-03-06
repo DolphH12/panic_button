@@ -139,17 +139,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   }
 
 
-  Widget backButton(context) {
-    return CupertinoButton(
-        padding: const EdgeInsets.all(0),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: const Icon(CupertinoIcons.back));
-  }
-
-
-  Widget propDetail({required String title, String? content}) {
+  Column propDetail({required String title, String? content}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -173,52 +163,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-  Widget multimediaPlayer(
-      {required IconData icon,
-      required String title,
-      required String duration}) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-      child: Container(
-        color: CupertinoColors.lightBackgroundGray,
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(right: 8),
-              child: Icon(icon, size: 32),
-            ),
-            Flexible(
-                fit: FlexFit.tight,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        duration,
-                        style: const TextStyle(
-                            color: CupertinoColors.secondaryLabel,
-                            fontSize: 14),
-                      )
-                    ])),
-            CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(
-                  CupertinoIcons.play_fill,
-                  color: CupertinoColors.activeBlue,
-                ),
-                onPressed: () {
-                })
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget eventDetail({required double gap, required int index}) {
+  Container eventDetail({required double gap, required int index}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
       child: Column(
@@ -284,13 +230,13 @@ class _EventDetailPageState extends State<EventDetailPage> {
     );
   }
 
-
-
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+     Widget build(BuildContext context) {
+       return MaterialApp(
+        debugShowCheckedModeBanner: false,
+         home: SafeArea(
+        child: Scaffold(
+           appBar: AppBar(
           foregroundColor: Theme.of(context).primaryColorDark,
           backgroundColor: Colors.white,
           centerTitle: true,
@@ -305,19 +251,84 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   Icon(Icons.arrow_back_ios_new),
                   Text("Regresar")
                 ],),),),),
-      body: ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: _lengList,      
-      itemBuilder: (BuildContext context, int index) {
-        return _isReady ? 
-          Container(
-            margin: const EdgeInsets.only(top: 20),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(width: 2)
-              ),),
-            child: eventDetail(gap: 30 ,index: index)): 
-            const Center(child: CircularProgressIndicator());
-     }));}}
+              body:  widget.eventData.list.isNotEmpty ? Column(
+               children: [
+                SizedBox(height: 10,),
+                 Text(
+                  "Número de eventos :  ${widget.eventData.list.length+1}",
+                  textAlign: TextAlign.start,
+                  style: const TextStyle(
+                  fontSize: 16, 
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black),),
+                 Expanded(
+                   child: ListView.builder(
+                               padding: const EdgeInsets.all(8),
+                               itemCount: _lengList,      
+                               itemBuilder: (BuildContext context, int index) {
+                               return _isReady ? 
+                                 Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 2)
+                      ),),
+                    child: eventDetail(gap: 30 ,index: index)): 
+                    const Center(child: CircularProgressIndicator());
+                            }),
+                 )
+               ],
+             ):Column(
+               children: [
+                 Expanded(
+                       child: ListView.builder(
+                                   padding: const EdgeInsets.all(8),
+                                   itemCount: _lengList,      
+                                   itemBuilder: (BuildContext context, int index) {
+                                   return _isReady ? 
+                                     Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(width: 2)
+                          ),),
+                        child: eventDetail(gap: 30 ,index: index)): 
+                        const Center(child: CircularProgressIndicator());
+                                }),
+                     ),
+               ],
+             ),
+           ),//SingleChildScrollView
+         
+       ),//Scaffold
+         //SafeArea
+); //MaterialApp
+     }
+
+  numberOfEvents(MapEvent event) {
+    return event.list.isNotEmpty ? Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Número de eventos:  ",
+        textAlign: TextAlign.start,
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+      ),
+      Text(
+              "${event.list.length}",
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: CupertinoColors.secondaryLabel),
+      )
+    ],
+  ): widget;
+  }
+    }
+
+
+
+
 
 
 
