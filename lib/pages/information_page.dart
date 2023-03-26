@@ -11,8 +11,6 @@ import 'package:panic_app/widgets/camera_image_widget.dart';
 import 'package:panic_app/widgets/custom_input.dart';
 import '../services/event_services.dart';
 
-
-
 class InformationPage extends StatelessWidget {
   const InformationPage({Key? key}) : super(key: key);
 
@@ -30,23 +28,18 @@ class InformationPage extends StatelessWidget {
             elevation: 0,
             leadingWidth: 100,
             leading: GestureDetector(
-              onTap: ()  => {
+              onTap: () => {
                 image.value = [],
                 video.value = ["", 0.0],
                 Navigator.pop(context)
               },
-
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
                 child: Row(
-                  children: [
-                    Icon(Icons.arrow_back_ios_new),
-                    Text("Regresar")
-                  ],
+                  children: [Icon(Icons.arrow_back_ios_new), Text("Regresar")],
                 ),
               ),
             ),
-
             centerTitle: true,
             title: Text(
               "Agrega información",
@@ -98,10 +91,9 @@ class _ContainPresentationState extends State<ContainPresentation> {
             controller: tipoCtrl,
           ),
           DescripcionEmergency(controller: descCtrl),
-          UbicacionEmergencia(ubiController: ubiCtrl, descUbiController: desUbiCtrl),
-              
+          UbicacionEmergencia(
+              ubiController: ubiCtrl, descUbiController: desUbiCtrl),
           const EvidenciasEmergencia(),
-
           EnviarEmergencia(
             desUbiCtrl: desUbiCtrl,
             descCtrl: descCtrl,
@@ -207,26 +199,28 @@ class _DescripcionEmergencyState extends State<DescripcionEmergency> {
             )
           ],
         ),
-        audio ? Card(
-          elevation: 0,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  IconButton(onPressed: () => setState(() => audio = !audio), icon: const Icon(Icons.delete,  color: Colors.black54, size: 27)),
-                  const SizedBox(width: 25),
-                  const Text(
-                  "*Graba un audio contando lo ocurrido",
-                  style: TextStyle(color: Colors.black54)),
-                ],
-              ),
-              const AudioPlayerWidget(),
-            ],
-          ),
-        ) 
-        
-        : const SizedBox()
+        audio
+            ? Card(
+                elevation: 0,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: () => setState(() => audio = !audio),
+                            icon: const Icon(Icons.delete,
+                                color: Colors.black54, size: 27)),
+                        const SizedBox(width: 25),
+                        const Text("*Graba un audio contando lo ocurrido",
+                            style: TextStyle(color: Colors.black54)),
+                      ],
+                    ),
+                    const AudioPlayerWidget(),
+                  ],
+                ),
+              )
+            : const SizedBox()
       ],
     );
   }
@@ -288,7 +282,7 @@ class EvidenciasEmergencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -302,12 +296,11 @@ class EvidenciasEmergencia extends StatelessWidget {
           ),
         ),
         Center(
-          child: Column(
-            children: [
-              CameraImageWidget(),
-            ],
-          )
-        )
+            child: Column(
+          children: [
+            CameraImageWidget(),
+          ],
+        ))
       ],
     );
   }
@@ -331,7 +324,6 @@ class EnviarEmergencia extends StatefulWidget {
 }
 
 class _EnviarEmergenciaState extends State<EnviarEmergencia> {
-  
   PreferenciasUsuario prefs = PreferenciasUsuario();
   bool anonimo = false;
   final eventService = EventService();
@@ -380,46 +372,52 @@ class _EnviarEmergenciaState extends State<EnviarEmergencia> {
               BtnCasual(
                   textobutton: "Cancelar",
                   onPressed: () => {
-                    FocusScope.of(context).requestFocus(FocusNode()),
-                    video.value = ["", 0.0],
-                    image.value = [],
-                    videoOld = "",
-                    Navigator.pop(context)
-                  },
-
+                        FocusScope.of(context).requestFocus(FocusNode()),
+                        video.value = ["", 0.0],
+                        image.value = [],
+                        videoOld = "",
+                        Navigator.pop(context)
+                      },
                   width: MediaQuery.of(context).size.width / 3,
-                  colorBtn: Colors.grey
-              ),
-
+                  colorBtn: Colors.grey),
               BtnCasual(
                   textobutton: "Enviar",
                   onPressed: () async {
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    final progress = ProgressHUD.of(context);
-                    progress!.show();
-                    Position position = await determinePosition();
-                    if(await eventService.addEvent(position, 10, widget.descCtrl.text)) {
-                        if(await eventService.attachFiles(image.value, recordFilePath , video.value)) {
-                          if(!mounted) return;
+                    if (widget.tipoCtrl.text.isEmpty ||
+                        widget.tipoCtrl.text.length < 4) {
+                      mensajeInfo(context, "Algo salio mal",
+                          "Verifica el campo de Tipo de Evento.\nNo debe estar vacio y debe ser mayor a 4 caracteres.");
+                    } else {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      final progress = ProgressHUD.of(context);
+                      progress!.show();
+                      Position position = await determinePosition();
+                      if (await eventService.addEvent(
+                          position, 10, widget.descCtrl.text)) {
+                        if (await eventService.attachFiles(
+                            image.value, recordFilePath, video.value)) {
+                          if (!mounted) return;
                           video.value = ["", 0.0];
                           image.value = [];
                           videoOld = "";
                           Navigator.pushNamed(context, 'home');
-                            mensajeInfo(context, "Envío exitoso",
-                                "Evidencias enviadas correctamente.");
+                          mensajeInfo(context, "Envío exitoso",
+                              "Evidencias enviadas correctamente.");
                         }
-                    } else {
-                      if(!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No fue posible el envío de evidencias, intenta de nuevo.'),
-                        ),
-                      );
+                      } else {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'No fue posible el envío de evidencias, intenta de nuevo.'),
+                          ),
+                        );
+                      }
+
+                      Future.delayed(const Duration(seconds: 5), () {
+                        progress.dismiss();
+                      });
                     }
-                    
-                    Future.delayed(const Duration(seconds: 5), () {
-                      progress.dismiss();
-                    });
                   },
                   width: MediaQuery.of(context).size.width / 3,
                   colorBtn: prefs.colorButton),

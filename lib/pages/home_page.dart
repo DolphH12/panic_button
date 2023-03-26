@@ -128,21 +128,29 @@ class MenuDrawer extends StatelessWidget {
                 const SwicthBtnPanic(),
               ],
             ),
-            ListTile(
-              title: const Text(
-                "Cerrar sesión",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-              ),
-              subtitle: const Text(
-                "Salir de la aplicación",
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              trailing: const Icon(Icons.exit_to_app_rounded),
-              onTap: () {
-                prefs.token = "";
-                prefs.refreshToken = "";
-                Navigator.pushReplacementNamed(context, 'login');
-              },
+            Column(
+              children: [
+                ListTile(
+                  title: const Text(
+                    "Cerrar sesión",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text(
+                    "Salir de la aplicación",
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  trailing: const Icon(Icons.exit_to_app_rounded),
+                  onTap: () {
+                    prefs.token = "";
+                    prefs.refreshToken = "";
+                    Navigator.pushReplacementNamed(context, 'login');
+                  },
+                ),
+                const Text(
+                  "V. 1.5.0",
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w300),
+                ),
+              ],
             )
           ],
         ),

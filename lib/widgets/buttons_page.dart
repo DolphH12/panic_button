@@ -58,7 +58,7 @@ class GeneratorEmergency extends StatelessWidget {
           tipo: events[index].name,
           color: colors[index],
           icon: events[index].image,
-          type: index + 2,
+          type: events[index].content.type,
         ),
       ),
     );

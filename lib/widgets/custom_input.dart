@@ -51,7 +51,7 @@ class _CustomInputState extends State<CustomInput> {
                 offset: const Offset(0, 5),
                 blurRadius: 5)
           ]),
-      child: TextField(
+      child: TextFormField(
         maxLengthEnforcement: MaxLengthEnforcement.enforced,
         maxLength: widget.maxChar == 0 ? null : widget.maxChar,
         enabled: widget.disabled,
@@ -60,6 +60,9 @@ class _CustomInputState extends State<CustomInput> {
         autocorrect: false,
         keyboardType: widget.keyboardType,
         obscureText: _passwordVisible,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9\s]')),
+        ],
         decoration: InputDecoration(
             errorMaxLines: 5,
             prefixIcon: Icon(widget.icon),
